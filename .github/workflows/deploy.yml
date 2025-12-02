@@ -38,5 +38,7 @@ jobs:
           GIGALIXIR_API_KEY: ${{ secrets.GIGALIXIR_PASSWORD }}
           GIGALIXIR_APP_NAME: ${{ secrets.GIGALIXIR_APP_NAME }}
         run: |
-          git remote add gigalixir https://$GIGALIXIR_EMAIL:$GIGALIXIR_API_KEY@git.gigalixir.com/$GIGALIXIR_APP_NAME.git || true
+          # URL-encode the email (replace @ with %40)
+          ENCODED_EMAIL=$(echo "$GIGALIXIR_EMAIL" | sed 's/@/%40/g')
+          git remote add gigalixir "https://${ENCODED_EMAIL}:${GIGALIXIR_API_KEY}@git.gigalixir.com/${GIGALIXIR_APP_NAME}.git" || true
           git push -f gigalixir HEAD:refs/heads/main
