@@ -162,150 +162,97 @@ end
 
 ---
 
-## ☁️ Crear Proyecto Supabase
+## ☁️ Supabase (AdminEx)
 
-### Pasos manuales (web):
+### Proyecto creado (02-Dic-2025)
+- **Name:** adminex
+- **Region:** us-east-2 (East US - Ohio)
+- **Project Ref:** `mxjcejukdxmfembcgpkt`
+- **Dashboard:** https://supabase.com/dashboard/project/mxjcejukdxmfembcgpkt
 
-1. Ve a [supabase.com](https://supabase.com) y crea cuenta (o login con GitHub)
-2. Click **"New Project"**
-3. Configura:
-   - **Name:** `adminex`
-   - **Database Password:** genera uno fuerte (¡guárdalo!)
-   - **Region:** elige la más cercana (ej: `us-east-1`)
-   - **Plan:** Free tier
-4. Una vez creado, ve a **Settings → Database** o click en **"Connect"**
-5. Copia el **Connection string** (modo "URI")
+### Connection Strings
 
-### Connection Strings de Supabase
+Configuradas en `.env` (ver `.env.example`):
+- `DATABASE_URL` → Pooled connection (puerto 6543) para runtime
+- `DIRECT_URL` → Direct connection (puerto 5432) para migraciones
 
-Supabase proporciona dos tipos de conexión:
+Obtener de: Supabase Dashboard → Connect → Connection String
 
-```bash
-# Pooled connection (para la app en runtime) - Puerto 6543
-DATABASE_URL="postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-1-us-east-2.pooler.supabase.com:6543/postgres?pgbouncer=true"
-
-# Direct connection (para migraciones) - Puerto 5432
-DIRECT_URL="postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-1-us-east-2.pooler.supabase.com:5432/postgres"
-```
-
-### Configurar archivos de entorno
+### Migraciones ejecutadas
 
 ```bash
-# Crear archivo .env (NO se sube a git)
-touch .env
-
-# Crear archivo .env.example (SÍ se sube, como template)
-touch .env.example
+mix ecto.migrate
+# Tablas creadas: roles, permissions, role_permissions, users, audit_logs
 ```
 
-Contenido de `.env`:
-```bash
-# Database (Supabase PostgreSQL)
-DATABASE_URL=postgresql://postgres.[REF]:[PASSWORD]@aws-1-us-east-2.pooler.supabase.com:6543/postgres?pgbouncer=true
-DIRECT_URL=postgresql://postgres.[REF]:[PASSWORD]@aws-1-us-east-2.pooler.supabase.com:5432/postgres
-
-# Phoenix
-SECRET_KEY_BASE=generate_with_mix_phx.gen.secret
-PHX_HOST=localhost
-
-# Supabase API (opcional)
-SUPABASE_URL=https://[REF].supabase.co
-SUPABASE_ANON_KEY=your_anon_key
-```
-
-### Modificar `config/dev.exs` para usar DATABASE_URL
-
-```elixir
-import Config
-
-# Use DATABASE_URL if available (for Supabase), otherwise use local postgres
-if System.get_env("DATABASE_URL") do
-  config :adminex, Adminex.Repo,
-    url: System.get_env("DATABASE_URL"),
-    stacktrace: true,
-    show_sensitive_data_on_connection_error: true,
-    pool_size: 10
-else
-  config :adminex, Adminex.Repo,
-    username: "postgres",
-    password: "postgres",
-    hostname: "localhost",
-    database: "adminex_dev",
-    stacktrace: true,
-    show_sensitive_data_on_connection_error: true,
-    pool_size: 10
-end
-```
-
-### Probar conexión a Supabase
+### Comandos útiles
 
 ```bash
-# Ejecutar migraciones (usa conexión directa, puerto 5432)
-DATABASE_URL='postgresql://postgres.[REF]:[PASSWORD]@aws-1-us-east-2.pooler.supabase.com:5432/postgres' mix ecto.migrate
+# Listar tablas
+mix run -e 'Adminex.Repo.query!("SELECT table_name FROM information_schema.tables WHERE table_schema = '\''public'\''") |> Map.get(:rows) |> IO.inspect()'
 
-# Resultado esperado:
-# Migrations already up
+# Limpiar tablas (si necesario)
+mix run -e 'Adminex.Repo.query!("DROP TABLE IF EXISTS audit_logs, role_permissions, users, permissions, roles CASCADE")'
 ```
-
-### Limpiar y crear tablas nuevas
-
-```bash
-# Listar tablas existentes
-DATABASE_URL='postgresql://postgres.[REF]:[PASSWORD]@aws-1-us-east-2.pooler.supabase.com:5432/postgres' mix run -e 'Adminex.Repo.query!("SELECT table_name FROM information_schema.tables WHERE table_schema = '\''public'\''") |> Map.get(:rows) |> IO.inspect()'
-
-# Borrar tablas existentes (si es necesario)
-DATABASE_URL='...' mix run -e '
-Adminex.Repo.query!("DROP TABLE IF EXISTS service_instances CASCADE")
-Adminex.Repo.query!("DROP TABLE IF EXISTS service_definitions CASCADE")
-Adminex.Repo.query!("DROP TABLE IF EXISTS profiles CASCADE")
-Adminex.Repo.query!("DROP TABLE IF EXISTS audit_logs CASCADE")
-Adminex.Repo.query!("DROP TABLE IF EXISTS role_permissions CASCADE")
-Adminex.Repo.query!("DROP TABLE IF EXISTS permissions CASCADE")
-Adminex.Repo.query!("DROP TABLE IF EXISTS roles CASCADE")
-'
-```
-
-### Generar migraciones
-
-```bash
-mix ecto.gen.migration create_roles
-mix ecto.gen.migration create_permissions
-mix ecto.gen.migration create_role_permissions
-mix ecto.gen.migration create_users
-mix ecto.gen.migration create_audit_logs
-```
-
-### Estructura de tablas creadas
-
-| Tabla | Columnas | Descripción |
-|-------|----------|-------------|
-| `roles` | id, name, description, timestamps | Roles del sistema |
-| `permissions` | id, code, description, timestamps | Permisos granulares (ej: "user.create") |
-| `role_permissions` | id, role_id, permission_id, timestamps | Tabla de unión N:M |
-| `users` | id, email, name, password_hash, role_id, active, timestamps | Usuarios del sistema |
-| `audit_logs` | id, action, resource_type, resource_id, actor_id, metadata, ip_address, user_agent, inserted_at | Log de auditoría |
 
 ---
 
-## 🖥️ Levantar servidor local
+## 🖥️ Desarrollo Local
 
-### Compilar assets (primera vez o si hay cambios)
+> ⚠️ **Importante:** Elixir NO carga `.env` automáticamente.
+> `System.get_env("DATABASE_URL")` lee variables del **sistema operativo**, no del archivo `.env`.
+> Debes exportar las variables antes de ejecutar comandos mix.
 
+### Opciones para cargar `.env`
+
+#### Opción 1: Alias en `.bashrc` ✅ (usamos esta)
 ```bash
-mix tailwind adminex && mix esbuild adminex
+# Agregar a ~/.bashrc (una sola vez)
+echo 'alias phx="export \$(cat .env | grep -v \"^#\" | xargs) && mix phx.server"' >> ~/.bashrc
+source ~/.bashrc
+
+# Luego solo ejecutas:
+phx
 ```
 
-### Iniciar servidor con Supabase
+#### Opción 2: Librería `dotenvy`
+Carga `.env` automáticamente al compilar. Agregar a `mix.exs`:
+```elixir
+{:dotenvy, "~> 0.8.0"}
+```
+
+#### Opción 3: Script `run.sh`
+```bash
+#!/bin/bash
+export $(cat .env | grep -v '^#' | xargs)
+mix phx.server
+```
+
+### Comandos de desarrollo
 
 ```bash
-DATABASE_URL='postgresql://postgres.[REF]:[PASSWORD]@aws-1-us-east-2.pooler.supabase.com:6543/postgres?pgbouncer=true' mix phx.server
+# Cargar variables manualmente (si no usas alias)
+export $(cat .env | grep -v '^#' | xargs)
+
+# Verificar que se cargaron (opcional)
+echo $DATABASE_URL
+
+# Compilar assets (primera vez)
+mix tailwind adminex && mix esbuild adminex
+
+# Iniciar servidor
+mix phx.server
+# O con el alias:
+phx
 ```
 
 Visita: **http://localhost:4000**
 
-```bash
-git add . && git commit -m "Add Supabase config, migrations, and local dev setup"
-```
+---
+
+## 📚 Documentación
+
+- **[.artifacts/ARQUITECTURA_DATOS.md](.artifacts/ARQUITECTURA_DATOS.md)** - Guía para crear nuevos proyectos desde este template
 
 ---
 
