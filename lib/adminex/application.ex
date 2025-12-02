@@ -43,8 +43,11 @@ defmodule Adminex.Application do
   # NOTE: On Gigalixir, Mnesia data is ephemeral (lost on deploy)
   # Use this only for sessions/cache, not for persistent data
   defp setup_mnesia do
-    # Ensure Mnesia is started
-    :ok = Memento.start()
+    # Ensure Mnesia is started (handle already started case)
+    case Memento.start() do
+      :ok -> :ok
+      {:error, {:already_started, :mnesia}} -> :ok
+    end
 
     # Create tables if they don't exist
     tables = [Adminex.Infra.Mnesia.SessionStore]

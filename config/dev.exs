@@ -1,14 +1,23 @@
 import Config
 
 # Configure your database
-config :adminex, Adminex.Repo,
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost",
-  database: "adminex_dev",
-  stacktrace: true,
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10
+# Use DATABASE_URL if available (for Supabase), otherwise use local postgres
+if System.get_env("DATABASE_URL") do
+  config :adminex, Adminex.Repo,
+    url: System.get_env("DATABASE_URL"),
+    stacktrace: true,
+    show_sensitive_data_on_connection_error: true,
+    pool_size: 10
+else
+  config :adminex, Adminex.Repo,
+    username: "postgres",
+    password: "postgres",
+    hostname: "localhost",
+    database: "adminex_dev",
+    stacktrace: true,
+    show_sensitive_data_on_connection_error: true,
+    pool_size: 10
+end
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
