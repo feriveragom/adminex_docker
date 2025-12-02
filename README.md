@@ -303,15 +303,9 @@ DATABASE_URL='postgresql://postgres.[REF]:[PASSWORD]@aws-1-us-east-2.pooler.supa
 
 Visita: **http://localhost:4000**
 
-### ⚠️ Nota Windows: Symlinks
-
-Si ves el warning de symlinks y los assets no cargan:
-
-1. Cierra VS Code
-2. Abre VS Code como **Administrador** (clic derecho → "Ejecutar como administrador")
-3. Vuelve a ejecutar `mix phx.server`
-
-Esto solo es necesario hacerlo **una vez** para habilitar symlinks en Windows.
+```bash
+git add . && git commit -m "Add Supabase config, migrations, and local dev setup"
+```
 
 ---
 
