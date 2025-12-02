@@ -163,7 +163,7 @@ Editar `.env` con tus valores:
 - `SUPABASE_URL`: URL del proyecto
 - `SUPABASE_ANON_KEY`: anon public key
 
-### Paso 5: Instalar y crear tablas
+### Paso 5: Instalar, migrar y poblar BD
 
 > ⚠️ **Importante:** Elixir NO carga `.env` automáticamente.
 > `System.get_env("DATABASE_URL")` lee variables del sistema operativo, no del archivo.
@@ -172,9 +172,23 @@ Editar `.env` con tus valores:
 ```bash
 mix deps.get
 
-# Cargar variables de .env y ejecutar migraciones
-export $(cat .env | grep -v '^#' | xargs) && mix ecto.migrate
+# Cargar variables de .env
+export $(cat .env | grep -v '^#' | xargs)
+
+# Crear tablas (migraciones)
+mix ecto.migrate
+
+# Poblar datos iniciales (roles, permisos, admin)
+mix run priv/repo/seeds.exs
 ```
+
+El seed crea:
+- **4 Roles:** SUPER_ADMIN, ADMIN, PREMIUM_USER, FREE_USER
+- **18 Permisos:** admin.access, users.*, roles.*, permissions.*, profile.*
+- **1 Usuario:** feriveragom@gmail.com como SUPER_ADMIN
+
+> 💡 **Nuevo usuario OAuth:** Al hacer login con Google, si el email no existe en BD,
+> se crea automáticamente con rol `FREE_USER`.
 
 ### Paso 6: Configurar `~/.bashrc` (una sola vez)
 
@@ -266,10 +280,64 @@ users ─────────────▶ audit_logs
 | Tabla | Campos clave |
 |-------|--------------|
 | `roles` | id, name, description |
-| `permissions` | id, code (ej: "user.create") |
+| `permissions` | id, code (ej: "users.create") |
 | `role_permissions` | role_id, permission_id |
-| `users` | id, email, password_hash, role_id, active |
+| `users` | id, email, name, role_id, active, provider, provider_uid, picture |
 | `audit_logs` | action, resource_type, resource_id, actor_id, metadata |
+
+---
+
+## 🔐 Sistema RBAC (Permission-Driven)
+
+### Roles por defecto
+
+| Rol | Descripción | Acceso a /admin |
+|-----|-------------|-----------------|
+| `SUPER_ADMIN` | Acceso total | ✅ |
+| `ADMIN` | Admin limitado (no puede eliminar) | ✅ |
+| `PREMIUM_USER` | Usuario de pago | ❌ |
+| `FREE_USER` | Usuario gratuito (default) | ❌ |
+
+### Permisos disponibles
+
+| Recurso | Permisos |
+|---------|----------|
+| **admin** | `admin.access` |
+| **users** | `users.read`, `users.create`, `users.update`, `users.delete` |
+| **roles** | `roles.read`, `roles.create`, `roles.update`, `roles.delete` |
+| **permissions** | `permissions.read`, `permissions.create`, `permissions.update`, `permissions.delete` |
+| **profile** | `profile.read`, `profile.update` |
+
+### Verificar permisos en código
+
+```elixir
+# En un plug (router)
+plug RequirePermission, permission: "admin.access"
+
+# En un servicio
+alias Adminex.Services.UserService
+
+if UserService.has_permission?(user, "users.delete") do
+  # puede eliminar usuarios
+end
+```
+
+### Matriz de permisos por rol
+
+| Permiso | SUPER_ADMIN | ADMIN | PREMIUM | FREE |
+|---------|:-----------:|:-----:|:-------:|:----:|
+| admin.access | ✅ | ✅ | ❌ | ❌ |
+| users.read | ✅ | ✅ | ❌ | ❌ |
+| users.create | ✅ | ✅ | ❌ | ❌ |
+| users.update | ✅ | ✅ | ❌ | ❌ |
+| users.delete | ✅ | ❌ | ❌ | ❌ |
+| roles.read | ✅ | ✅ | ❌ | ❌ |
+| roles.create | ✅ | ❌ | ❌ | ❌ |
+| roles.update | ✅ | ❌ | ❌ | ❌ |
+| roles.delete | ✅ | ❌ | ❌ | ❌ |
+| permissions.* | ✅ | read | ❌ | ❌ |
+| profile.read | ✅ | ✅ | ✅ | ✅ |
+| profile.update | ✅ | ✅ | ✅ | ✅ |
 
 ---
 

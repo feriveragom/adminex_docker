@@ -74,8 +74,10 @@ defmodule AdminexWeb.AuthController do
       client_id: System.get_env("GOOGLE_CLIENT_ID"),
       client_secret: System.get_env("GOOGLE_CLIENT_SECRET"),
       redirect_uri: redirect_uri(),
-      # Forzar selección de cuenta siempre
-      authorization_params: [prompt: "select_account"]
+      authorization_params: [
+        scope: "openid email profile",
+        prompt: "select_account"
+      ]
     ]
   end
 
@@ -92,23 +94,43 @@ defmodule AdminexWeb.AuthController do
   end
 
   defp handle_successful_auth(conn, user_info) do
-    # user_info contains: sub, email, name, picture, email_verified, etc.
-    email = user_info["email"]
-    name = user_info["name"] || user_info["email"]
+    alias Adminex.Services.UserService
+    require Logger
 
-    # TODO: Create or find user in database
-    # For now, just store in session
+    # Debug: ver estructura de user_info
+    Logger.debug("OAuth user_info: #{inspect(user_info)}")
 
-    conn
-    |> delete_session(:oauth_session_params)
-    |> put_session(:current_user, %{
-      email: email,
-      name: name,
-      picture: user_info["picture"],
-      provider: "google",
-      provider_uid: user_info["sub"]
-    })
-    |> put_flash(:info, "¡Bienvenido, #{name}!")
-    |> redirect(to: ~p"/")
+    # Buscar o crear usuario en la BD
+    case UserService.find_or_create_from_oauth(user_info) do
+      {:ok, user} ->
+        # Guardar en sesión (incluye info del rol)
+        conn
+        |> delete_session(:oauth_session_params)
+        |> put_session(:current_user, %{
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          picture: user.picture,
+          provider: user.provider,
+          provider_uid: user.provider_uid,
+          role: user.role && user.role.name
+        })
+        |> redirect(to: ~p"/")
+
+      {:error, :role_not_found} ->
+        conn
+        |> put_flash(:error, "Error: ejecuta 'mix run priv/repo/seeds.exs' para crear roles")
+        |> redirect(to: ~p"/login")
+
+      {:error, :email_not_provided} ->
+        conn
+        |> put_flash(:error, "Error: Google no proporcionó email. Verifica permisos OAuth.")
+        |> redirect(to: ~p"/login")
+
+      {:error, changeset} ->
+        conn
+        |> put_flash(:error, "Error al crear usuario: #{inspect(changeset.errors)}")
+        |> redirect(to: ~p"/login")
+    end
   end
 end

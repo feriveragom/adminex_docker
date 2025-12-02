@@ -74,8 +74,17 @@ config :adminex, AdminexWeb.Endpoint,
 # Enable dev routes for dashboard and mailbox
 config :adminex, dev_routes: true
 
-# Do not include metadata nor timestamps in development logs
-config :logger, :console, format: "[$level] $message\n"
+# Logger con colores para mejor legibilidad en desarrollo
+config :logger, :console,
+  format: "$time $metadata[$level] $message\n",
+  metadata: [:request_id],
+  colors: [
+    enabled: true,
+    debug: :cyan,
+    info: :green,
+    warning: :yellow,
+    error: :red
+  ]
 
 # Set a higher stacktrace during development. Avoid configuring such
 # in production as building large stacktraces may be expensive.

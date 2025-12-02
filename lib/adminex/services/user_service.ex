@@ -1,83 +1,98 @@
 defmodule Adminex.Services.UserService do
   @moduledoc """
-  User business logic service.
-  Orchestrates domain operations and authorization.
+  Servicio para gestión de usuarios.
   """
 
-  alias Adminex.Domain.User
-  alias Adminex.Policies.Policy
+  import Ecto.Query
+  alias Adminex.Repo
+  alias Adminex.Schemas.{User, Role}
 
   @doc """
-  Lists all users (requires user.list permission).
+  Busca un usuario por email. Si no existe, lo crea con rol FREE_USER.
+  Retorna el usuario con su rol precargado.
   """
-  def list(actor) do
-    if Policy.can?(actor, "user.list") do
-      # TODO: Implement with repository
-      {:ok, []}
+  def find_or_create_from_oauth(oauth_info) do
+    email = oauth_info["email"]
+
+    if is_nil(email) do
+      {:error, :email_not_provided}
     else
-      {:error, :unauthorized}
+      case get_by_email(email) do
+        nil -> create_from_oauth(oauth_info)
+        user -> {:ok, Repo.preload(user, :role)}
+      end
     end
   end
 
   @doc """
-  Gets a user by ID (requires user.read permission).
+  Busca un usuario por email.
   """
-  def get(id, actor) do
-    if Policy.can?(actor, "user.read") do
-      # TODO: Implement with repository
-      {:error, :not_found}
-    else
-      {:error, :unauthorized}
-    end
+  def get_by_email(nil), do: nil
+  def get_by_email(email) do
+    Repo.get_by(User, email: email)
   end
 
   @doc """
-  Creates a new user (requires user.create permission).
+  Crea un usuario desde información OAuth con rol por defecto.
   """
-  def create(attrs, actor) do
-    if Policy.can?(actor, "user.create") do
-      # TODO: Implement with repository
-      user = %User{
-        id: generate_id(),
-        email: attrs[:email],
-        name: attrs[:name],
-        role_id: attrs[:role_id],
-        active: true,
-        inserted_at: DateTime.utc_now(),
-        updated_at: DateTime.utc_now()
+  def create_from_oauth(oauth_info) do
+    with {:ok, role} <- get_default_role() do
+      attrs = %{
+        email: oauth_info["email"],
+        name: oauth_info["name"],
+        provider: "google",
+        provider_uid: oauth_info["sub"],
+        picture: oauth_info["picture"],
+        role_id: role.id
       }
 
-      {:ok, user}
-    else
-      {:error, :unauthorized}
+      %User{}
+      |> User.oauth_changeset(attrs)
+      |> Repo.insert()
+      |> case do
+        {:ok, user} -> {:ok, Repo.preload(user, :role)}
+        {:error, changeset} -> {:error, changeset}
+      end
     end
   end
 
   @doc """
-  Updates a user (requires user.update permission).
+  Obtiene el rol por defecto (FREE_USER).
   """
-  def update(id, attrs, actor) do
-    if Policy.can?(actor, "user.update") do
-      # TODO: Implement with repository
-      {:error, :not_found}
-    else
-      {:error, :unauthorized}
+  def get_default_role do
+    case Repo.get_by(Role, name: Role.free_user()) do
+      nil -> {:error, :role_not_found}
+      role -> {:ok, role}
     end
   end
 
   @doc """
-  Deletes a user (requires user.delete permission).
+  Verifica si un usuario tiene un permiso específico.
   """
-  def delete(id, actor) do
-    if Policy.can?(actor, "user.delete") do
-      # TODO: Implement with repository
-      {:error, :not_found}
-    else
-      {:error, :unauthorized}
+  def has_permission?(nil, _permission_code), do: false
+
+  def has_permission?(user, permission_code) when is_struct(user) do
+    user = Repo.preload(user, role: :permissions)
+
+    case user.role do
+      nil -> false
+      role -> Enum.any?(role.permissions, &(&1.code == permission_code))
     end
   end
 
-  defp generate_id do
-    :crypto.strong_rand_bytes(16) |> Base.url_encode64(padding: false)
+  def has_permission?(user_id, permission_code) when is_binary(user_id) do
+    case Repo.get(User, user_id) do
+      nil -> false
+      user -> has_permission?(user, permission_code)
+    end
+  end
+
+  @doc """
+  Obtiene un usuario por ID con su rol y permisos precargados.
+  """
+  def get_with_permissions(user_id) do
+    User
+    |> Repo.get(user_id)
+    |> Repo.preload(role: :permissions)
   end
 end

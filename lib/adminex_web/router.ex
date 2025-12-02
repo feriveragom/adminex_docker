@@ -40,12 +40,23 @@ defmodule AdminexWeb.Router do
     get "/:provider/callback", AuthController, :callback
   end
 
+  # Pipeline para rutas de admin (requiere permiso admin.access)
+  pipeline :admin do
+    plug AdminexWeb.Plugs.RequirePermission, permission: "admin.access"
+  end
+
   # Rutas protegidas (requieren autenticación)
   scope "/", AdminexWeb do
     pipe_through [:browser, :auth]
 
     live "/", HomeLive, :index
     live "/profile", ProfileLive, :index
+  end
+
+  # Rutas de admin (requieren permiso admin.access)
+  scope "/", AdminexWeb do
+    pipe_through [:browser, :auth, :admin]
+
     live "/admin", AdminLive, :index
   end
 

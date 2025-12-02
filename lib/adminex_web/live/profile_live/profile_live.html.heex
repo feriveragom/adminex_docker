@@ -75,7 +75,7 @@
         <div>
           <p class="text-sm text-primary-400 dark:text-primary-500">ID de Usuario</p>
           <div class="mt-1 inline-flex items-center px-3 py-1.5 rounded-lg bg-primary-50 dark:bg-primary-900/30">
-            <code class="text-sm font-mono text-primary-700 dark:text-primary-300"><%= @user_id %></code>
+            <code class="text-sm font-mono text-primary-700 dark:text-primary-300"><%= @current_user[:id] || "N/A" %></code>
           </div>
         </div>
       </div>

@@ -31,7 +31,61 @@ Un template/boilerplate para crear aplicaciones administrativas con:
 
 ---
 
-# Guía de Instalación
+## 🚀 Quick Start (nuevo proyecto)
+
+```bash
+# 1. Clonar
+git clone https://github.com/feriveragom/adminex.git mi-proyecto
+cd mi-proyecto
+
+# 2. Configurar .env (copia y edita con tus credenciales)
+cp .env.example .env
+
+# 3. Cargar variables de entorno
+export $(cat .env | grep -v '^#' | xargs)
+
+# 4. Instalar dependencias
+mix deps.get
+
+# 5. Crear tablas en PostgreSQL
+mix ecto.migrate
+
+# 6. Poblar datos iniciales (roles, permisos, admin)
+mix run priv/repo/seeds.exs
+
+# 7. Iniciar servidor
+iex -S mix phx.server
+```
+
+### El seed crea:
+
+| Tipo | Datos |
+|------|-------|
+| **Roles** | SUPER_ADMIN, ADMIN, PREMIUM_USER, FREE_USER |
+| **Permisos** | admin.access, users.*, roles.*, permissions.*, profile.* |
+| **Usuario** | feriveragom@gmail.com como SUPER_ADMIN |
+
+> 💡 Todo usuario nuevo que se loguee con Google se crea automáticamente como `FREE_USER`
+
+---
+
+## 🔐 Sistema RBAC
+
+Verificar permisos en código:
+
+```elixir
+# En router (plug)
+plug RequirePermission, permission: "admin.access"
+
+# En servicio
+UserService.has_permission?(user, "users.delete")
+```
+
+Ver documentación completa en [.artifacts/ARQUITECTURA_DATOS.md](.artifacts/ARQUITECTURA_DATOS.md)
+
+---
+
+# Guía de Instalación (Windows)
 
 ## Instalación Manual de Erlang/OTP 25 y Elixir 1.14
 
