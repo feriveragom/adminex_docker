@@ -13,7 +13,6 @@ defmodule AdminexWeb.Plugs.RequireAuth do
       assign(conn, :current_user, get_session(conn, :current_user))
     else
       conn
-      |> put_flash(:error, "Debes iniciar sesión para acceder a esta página")
       |> redirect(to: "/login")
       |> halt()
     end

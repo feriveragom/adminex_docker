@@ -73,7 +73,9 @@ defmodule AdminexWeb.AuthController do
     [
       client_id: System.get_env("GOOGLE_CLIENT_ID"),
       client_secret: System.get_env("GOOGLE_CLIENT_SECRET"),
-      redirect_uri: redirect_uri()
+      redirect_uri: redirect_uri(),
+      # Forzar selección de cuenta siempre
+      authorization_params: [prompt: "select_account"]
     ]
   end
 

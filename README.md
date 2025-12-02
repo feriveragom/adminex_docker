@@ -1,4 +1,39 @@
-# Instalación Manual de Erlang/OTP 25 y Elixir 1.14
+# AdminEx
+
+> 🚀 **Template de administración con Elixir/Phoenix + Google OAuth + RBAC**
+
+## Demo en Producción
+
+**https://adminex.gigalixirapp.com/**
+
+## ¿Qué es AdminEx?
+
+Un template/boilerplate para crear aplicaciones administrativas con:
+
+- ✅ **Autenticación OAuth** (Google)
+- ✅ **RBAC** (Roles y Permisos granulares)
+- ✅ **UI Purple Theme** (Tailwind + Dark Mode)
+- ✅ **Deploy automático** (GitHub Actions → Gigalixir)
+- ✅ **Mnesia** para sesiones (cache en memoria)
+- ✅ **PostgreSQL/Supabase** para persistencia
+
+## Stack
+
+| Tecnología | Versión | Uso |
+|------------|---------|-----|
+| Elixir | 1.18 | Lenguaje |
+| Phoenix | 1.7 | Framework Web |
+| LiveView | 1.0 | UI Reactiva |
+| Tailwind CSS | 3.4 | Estilos |
+| Mnesia | - | Sesiones (RAM) |
+| PostgreSQL | 15+ | Base de datos |
+| Gigalixir | - | Hosting |
+
+---
+
+# Guía de Instalación
+
+## Instalación Manual de Erlang/OTP 25 y Elixir 1.14
 
 ## Instalar Scoop. Abre PowerShell como administrador. (Power Shell)
 
