@@ -34,10 +34,9 @@ jobs:
 
       - name: Deploy to Gigalixir
         env:
-          GIGALIXIR_USERNAME: ${{ secrets.GIGALIXIR_USERNAME }}
-          GIGALIXIR_PASSWORD: ${{ secrets.GIGALIXIR_PASSWORD }}
+          GIGALIXIR_EMAIL: ${{ secrets.GIGALIXIR_USERNAME }}
+          GIGALIXIR_API_KEY: ${{ secrets.GIGALIXIR_PASSWORD }}
           GIGALIXIR_APP_NAME: ${{ secrets.GIGALIXIR_APP_NAME }}
         run: |
-          gigalixir login -e "$GIGALIXIR_USERNAME" -p "$GIGALIXIR_PASSWORD" -y
-          git remote add gigalixir https://$GIGALIXIR_USERNAME:$GIGALIXIR_PASSWORD@git.gigalixir.com/$GIGALIXIR_APP_NAME.git || true
+          git remote add gigalixir https://$GIGALIXIR_EMAIL:$GIGALIXIR_API_KEY@git.gigalixir.com/$GIGALIXIR_APP_NAME.git || true
           git push -f gigalixir HEAD:refs/heads/main
