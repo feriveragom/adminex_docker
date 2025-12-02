@@ -222,6 +222,67 @@ end
 | Necesitas transformar errores | `Error.m` con `Error.map_error/2` |
 | Código más legible/mantenible | `Error.m` |
 
+### 9. Colocated Templates (LiveView)
+Separar la lógica del módulo `.ex` del template `.heex` en carpetas dedicadas.
+
+**Estructura:**
+```
+lib/adminex_web/live/
+├── home_live/
+│   ├── home_live.ex        # Lógica (mount, handle_event, etc.)
+│   └── home_live.html.heex # Template (solo HTML/HEEx)
+├── login_live/
+│   ├── login_live.ex
+│   └── login_live.html.heex
+└── users_live/
+    ├── index_live.ex
+    ├── index_live.html.heex
+    ├── show_live.ex
+    └── show_live.html.heex
+```
+
+```elixir
+# ✅ CORRECTO - Template separado (archivo .html.heex en la misma carpeta)
+defmodule AdminexWeb.HomeLive do
+  use AdminexWeb, :live_view
+
+  @impl true
+  def mount(_params, session, socket) do
+    {:ok, assign(socket, :page_title, "Inicio")}
+  end
+
+  # NO se define render/1 - Phoenix busca home_live.html.heex automáticamente
+end
+
+# ❌ INCORRECTO - Template inline (difícil de mantener en templates grandes)
+defmodule AdminexWeb.HomeLive do
+  use AdminexWeb, :live_view
+
+  @impl true
+  def mount(_params, session, socket) do
+    {:ok, assign(socket, :page_title, "Inicio")}
+  end
+
+  @impl true
+  def render(assigns) do
+    ~H"""
+    <div>... mucho HTML aquí ...</div>
+    """
+  end
+end
+```
+
+**Beneficios:**
+- Separación clara entre lógica y presentación
+- Mejor soporte de editores/IDEs para HTML
+- Más fácil de revisar en PRs
+- Templates pueden crecer sin ensuciar el código Elixir
+
+**Reglas:**
+- El archivo `.heex` DEBE tener el mismo nombre base que el `.ex`
+- Phoenix lo encuentra automáticamente, NO usar `embed_templates` en LiveView
+- `embed_templates` es para `Phoenix.Component`, NO para `Phoenix.LiveView`
+
 ---
 
 ## ❌ Anti-Patrones a Evitar

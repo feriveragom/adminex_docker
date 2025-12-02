@@ -1,32 +1,149 @@
-<header class="px-4 sm:px-6 lg:px-8">
-  <div class="flex items-center justify-between border-b border-zinc-100 py-3 text-sm">
-    <div class="flex items-center gap-4">
-      <a href="/">
-        <img src={~p"/images/logo.svg"} width="36" />
-      </a>
-      <p class="bg-brand/5 text-brand rounded-full px-2 font-medium leading-6">
-        v<%= Application.spec(:phoenix, :vsn) %>
-      </p>
+<%!-- Layout principal de la aplicación - Elixir Purple Theme --%>
+<div class="min-h-screen bg-surface-light dark:bg-surface-dark">
+  <%!-- Header con glassmorphism --%>
+  <header class="glass sticky top-0 z-40 border-b border-primary-100/20 dark:border-primary-800/30">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex h-16 justify-between items-center">
+        <%!-- Logo (izquierda) --%>
+        <div class="flex items-center">
+          <a href="/" class="flex items-center gap-2 group">
+            <div class="w-8 h-8 bg-gradient-elixir rounded-lg flex items-center justify-center shadow-glow group-hover:shadow-glow-lg transition-shadow">
+              <span class="text-white font-bold text-sm">A</span>
+            </div>
+            <span class="text-xl font-bold text-gradient">AdminEx</span>
+          </a>
+        </div>
+
+        <%!-- Controles derecha --%>
+        <div class="flex items-center gap-3">
+          <%!-- Toggle dark mode --%>
+          <button
+            type="button"
+            class="p-2 rounded-full text-primary-600 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
+            onclick="document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light')"
+          >
+            <%!-- Sol (dark mode → light) --%>
+            <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            <%!-- Luna (light mode → dark) --%>
+            <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+          </button>
+
+          <%!-- Menú de perfil --%>
+          <div class="relative" id="profile-menu">
+            <button
+              type="button"
+              class="flex items-center gap-2 rounded-full bg-primary-50 dark:bg-primary-900/30 p-1 pr-3 hover:bg-primary-100 dark:hover:bg-primary-800/40 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
+              phx-click={JS.toggle(to: "#profile-dropdown")}
+            >
+              <%= if @current_user do %>
+                <%= if @current_user.picture do %>
+                  <img src={@current_user.picture} class="w-8 h-8 rounded-full ring-2 ring-primary-200 dark:ring-primary-700" alt="Avatar" />
+                <% else %>
+                  <div class="w-8 h-8 rounded-full bg-gradient-elixir flex items-center justify-center">
+                    <span class="text-white text-sm font-medium">
+                      <%= String.first(@current_user.name || @current_user.email || "U") %>
+                    </span>
+                  </div>
+                <% end %>
+                <span class="text-sm font-medium text-primary-700 dark:text-primary-200 hidden sm:block">
+                  <%= @current_user.name || @current_user.email %>
+                </span>
+              <% else %>
+                <div class="w-8 h-8 rounded-full bg-primary-300 flex items-center justify-center">
+                  <span class="text-white text-sm">?</span>
+                </div>
+              <% end %>
+              <svg class="w-4 h-4 text-primary-500 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            <%!-- Dropdown menu --%>
+            <div
+              id="profile-dropdown"
+              class="hidden absolute right-0 mt-2 w-64 rounded-xl bg-card-light dark:bg-card-dark py-2 shadow-elixir-lg ring-1 ring-primary-100 dark:ring-primary-800/50 z-50"
+              phx-click-away={JS.hide(to: "#profile-dropdown")}
+            >
+              <%!-- Header del dropdown --%>
+              <div class="px-4 py-3 border-b border-primary-100 dark:border-primary-800/50">
+                <p class="text-sm font-semibold text-primary-900 dark:text-primary-100">
+                  <%= @current_user.name || "Usuario" %>
+                </p>
+                <p class="text-sm text-primary-500 dark:text-primary-400 truncate">
+                  <%= @current_user.email %>
+                </p>
+              </div>
+
+              <%!-- Logo AdminEx en el menú --%>
+              <a
+                href="/"
+                class="flex items-center gap-3 px-4 py-2.5 text-sm text-primary-700 dark:text-primary-200 hover:bg-primary-50 dark:hover:bg-primary-900/30"
+              >
+                <div class="w-5 h-5 bg-gradient-elixir rounded flex items-center justify-center flex-shrink-0">
+                  <span class="text-white font-bold text-xs">A</span>
+                </div>
+                <span class="font-medium">AdminEx</span>
+              </a>
+
+              <%!-- Mi Perfil --%>
+              <a
+                href="/profile"
+                class="flex items-center gap-3 px-4 py-2.5 text-sm text-primary-700 dark:text-primary-200 hover:bg-primary-50 dark:hover:bg-primary-900/30"
+              >
+                <svg class="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                Mi Perfil
+              </a>
+
+              <%!-- Admin Panel --%>
+              <a
+                href="/admin"
+                class="flex items-center gap-3 px-4 py-2.5 text-sm text-primary-700 dark:text-primary-200 hover:bg-primary-50 dark:hover:bg-primary-900/30"
+              >
+                <svg class="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Admin Panel
+              </a>
+
+              <hr class="my-2 border-primary-100 dark:border-primary-800/50" />
+
+              <%!-- Cerrar Sesión --%>
+              <a
+                href="/auth/logout"
+                class="flex items-center gap-3 px-4 py-2.5 text-sm text-accent dark:text-accent-light hover:bg-primary-50 dark:hover:bg-primary-900/30"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Cerrar Sesión
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="flex items-center gap-4 font-semibold leading-6 text-zinc-900">
-      <a href="https://twitter.com/elixirphoenix" class="hover:text-zinc-700">
-        @elixirphoenix
-      </a>
-      <a href="https://github.com/phoenixframework/phoenix" class="hover:text-zinc-700">
-        GitHub
-      </a>
-      <a
-        href="https://hexdocs.pm/phoenix/overview.html"
-        class="rounded-lg bg-zinc-100 px-2 py-1 hover:bg-zinc-200/80"
-      >
-        Get Started <span aria-hidden="true">&rarr;</span>
-      </a>
-    </div>
-  </div>
-</header>
-<main class="px-4 py-20 sm:px-6 lg:px-8">
-  <div class="mx-auto max-w-2xl">
+  </header>
+
+  <%!-- Main content --%>
+  <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
     <.flash_group flash={@flash} />
     <%= @inner_content %>
-  </div>
-</main>
+  </main>
+</div>
+
+<script>
+  // Aplicar tema guardado al cargar
+  if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+</script>
+

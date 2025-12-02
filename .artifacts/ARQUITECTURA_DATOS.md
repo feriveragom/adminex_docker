@@ -176,41 +176,37 @@ mix deps.get
 export $(cat .env | grep -v '^#' | xargs) && mix ecto.migrate
 ```
 
-### Paso 6: Configurar carga de `.env` (elige una opción)
+### Paso 6: Configurar `~/.bashrc` (una sola vez)
 
-#### Opción A: Alias en `.bashrc` (recomendada para desarrollo)
+El archivo `~/.bashrc` está en tu home (fuera del proyecto):
+- **Windows:** `C:\Users\<tu_usuario>\.bashrc`
+- **Mac/Linux:** `~/.bashrc`
+
+Se ejecuta automáticamente cada vez que abres una terminal.
+
 ```bash
-# Agregar a ~/.bashrc (una sola vez)
-echo 'alias phx="export \$(cat .env | grep -v \"^#\" | xargs) && iex -S mix phx.server"' >> ~/.bashrc
+# Crear ~/.bashrc con alias para Phoenix y PATH para Gigalixir CLI (Windows)
+echo 'alias phx="export \$(cat .env | grep -v \"^#\" | xargs) && iex -S mix phx.server"' > ~/.bashrc
+echo "export PATH=\"\$PATH:/c/Users/$USER/AppData/Local/Programs/Python/Python313/Scripts\"" >> ~/.bashrc
 source ~/.bashrc
-
-# Luego solo ejecutas:
-phx
 ```
 
-> **Nota:** Usamos `iex -S mix phx.server` en lugar de `mix phx.server` para tener:
-> - ✅ Servidor web corriendo
-> - ✅ Consola interactiva IEx para probar funciones
-> - ✅ Recompilar con `recompile()` sin reiniciar
+> **Nota:** `$USER` se reemplaza automáticamente con tu nombre de usuario.
+> En Mac/Linux el PATH de Python es diferente (normalmente ya está en PATH).
 
-#### Opción B: Librería `dotenvy` (automática)
-Carga `.env` al compilar. Agregar a `mix.exs`:
-```elixir
-{:dotenvy, "~> 0.8.0"}
-```
-Y en `config/runtime.exs`:
-```elixir
-if config_env() == :dev do
-  Dotenvy.source!([".env"])
-end
-```
-
-#### Opción C: Script `run.sh`
+#### Verificar que funcionó:
 ```bash
-#!/bin/bash
-export $(cat .env | grep -v '^#' | xargs)
-mix phx.server
+cat ~/.bashrc
+# Debería mostrar:
+# alias phx="export $(cat .env | grep -v "^#" | xargs) && iex -S mix phx.server"
+# export PATH="$PATH:..."
 ```
+
+#### ¿Qué hace el alias `phx`?
+- ✅ Carga variables de `.env` del proyecto actual
+- ✅ Inicia servidor Phoenix
+- ✅ Abre consola interactiva IEx para probar funciones
+- ✅ Permite `recompile()` sin reiniciar
 
 ### Paso 7: Compilar assets e iniciar
 
@@ -231,11 +227,7 @@ mix phx.server
 # Instalar CLI (Windows)
 python -m pip install gigalixir
 
-# Agregar al PATH (en ~/.bashrc) - ajustar ruta según tu usuario
-echo 'export PATH="$PATH:/c/Users/TU_USUARIO/AppData/Local/Programs/Python/Python313/Scripts"' >> ~/.bashrc
-source ~/.bashrc
-
-# Verificar
+# Verificar (el PATH ya se configuró en Paso 6)
 gigalixir version
 
 # Login (elige una opción)
@@ -245,10 +237,13 @@ gigalixir login:google    # Abre navegador para OAuth
 # Crear app
 gigalixir apps:create --name mi-proyecto
 
-# Configurar variables de entorno
-gigalixir config:set DATABASE_URL="tu_database_url"
-gigalixir config:set SECRET_KEY_BASE="$(mix phx.gen.secret)"
+# Configurar variables de entorno (cargar .env primero)
+export $(cat .env | grep -v '^#' | xargs)
+gigalixir config:set DATABASE_URL="$DATABASE_URL"
+gigalixir config:set SECRET_KEY_BASE="$SECRET_KEY_BASE"
 gigalixir config:set PHX_HOST="mi-proyecto.gigalixirapp.com"
+gigalixir config:set GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID"
+gigalixir config:set GOOGLE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"
 
 # Agregar remote de Gigalixir
 gigalixir git:remote mi-proyecto

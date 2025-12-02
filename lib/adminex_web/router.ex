@@ -8,25 +8,45 @@ defmodule AdminexWeb.Router do
     plug :put_root_layout, html: {AdminexWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug AdminexWeb.Plugs.FetchCurrentUser
+  end
+
+  pipeline :auth do
+    plug AdminexWeb.Plugs.RequireAuth
   end
 
   pipeline :api do
     plug :accepts, ["json"]
   end
 
+  # Rutas públicas (login) - usa layout auth
   scope "/", AdminexWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live_session :public, layout: {AdminexWeb.Layouts, :auth} do
+      live "/login", LoginLive, :index
+    end
   end
 
-  # OAuth routes
+  # OAuth routes (públicas)
   scope "/auth", AdminexWeb do
     pipe_through :browser
 
+    # Logout primero (antes de /:provider para evitar conflicto)
+    # Usamos GET para simplificar - logout es idempotente
+    get "/logout", AuthController, :logout
+
     get "/:provider", AuthController, :request
     get "/:provider/callback", AuthController, :callback
-    delete "/logout", AuthController, :logout
+  end
+
+  # Rutas protegidas (requieren autenticación)
+  scope "/", AdminexWeb do
+    pipe_through [:browser, :auth]
+
+    live "/", HomeLive, :index
+    live "/profile", ProfileLive, :index
+    live "/admin", AdminLive, :index
   end
 
   # Other scopes may use custom stacks.

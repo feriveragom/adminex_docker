@@ -227,31 +227,35 @@ mix run -e 'Adminex.Repo.query!("DROP TABLE IF EXISTS audit_logs, role_permissio
 > `System.get_env("DATABASE_URL")` lee variables del **sistema operativo**, no del archivo `.env`.
 > Debes exportar las variables antes de ejecutar comandos mix.
 
-### Opciones para cargar `.env`
+### Configurar `~/.bashrc` (una sola vez)
 
-#### Opción 1: Alias en `.bashrc` ✅ (usamos esta)
+El archivo `~/.bashrc` está en tu home (`C:\Users\<tu_usuario>\.bashrc` en Windows).
+Se ejecuta cada vez que abres una terminal Git Bash.
+
 ```bash
-# Agregar a ~/.bashrc (una sola vez)
-echo 'alias phx="export \$(cat .env | grep -v \"^#\" | xargs) && iex -S mix phx.server"' >> ~/.bashrc
+# Crear ~/.bashrc con alias y PATH (Windows con Git Bash)
+echo 'alias phx="export \$(cat .env | grep -v \"^#\" | xargs) && iex -S mix phx.server"' > ~/.bashrc
+echo "export PATH=\"\$PATH:/c/Users/$USER/AppData/Local/Programs/Python/Python313/Scripts\"" >> ~/.bashrc
 source ~/.bashrc
-
-# Luego solo ejecutas:
-phx
 ```
 
-> **Nota:** Usamos `iex -S mix phx.server` para tener servidor + consola interactiva IEx.
+> **Nota:** `$USER` se reemplaza automáticamente con tu nombre de usuario.
 
-#### Opción 2: Librería `dotenvy`
-Carga `.env` automáticamente al compilar. Agregar a `mix.exs`:
-```elixir
-{:dotenvy, "~> 0.8.0"}
-```
+### Verificar configuración
 
-#### Opción 3: Script `run.sh`
 ```bash
-#!/bin/bash
-export $(cat .env | grep -v '^#' | xargs)
-mix phx.server
+cat ~/.bashrc
+# Debería mostrar:
+# alias phx="export $(cat .env | grep -v "^#" | xargs) && iex -S mix phx.server"
+# export PATH="$PATH:/c/Users/<tu_usuario>/..."
+```
+
+### Usar el alias
+
+```bash
+cd d:/Personal/emprendedores/adminex
+phx
+# Carga .env + inicia servidor + consola interactiva IEx
 ```
 
 ### Comandos de desarrollo

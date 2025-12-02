@@ -1,0 +1,33 @@
+<%!-- Layout para páginas de autenticación - Elixir Purple Theme --%>
+<main class="min-h-screen bg-surface-light dark:bg-surface-dark flex items-center justify-center px-4 py-12">
+  <div class="w-full max-w-md">
+    <%!-- Logo centrado con gradiente --%>
+    <div class="text-center mb-8">
+      <a href="/" class="inline-flex items-center gap-3 group">
+        <div class="w-12 h-12 bg-gradient-elixir rounded-xl flex items-center justify-center shadow-glow group-hover:shadow-glow-lg transition-shadow">
+          <span class="text-white font-bold text-xl">A</span>
+        </div>
+        <span class="text-3xl font-bold text-gradient">AdminEx</span>
+      </a>
+    </div>
+    
+    <%!-- Card con glassmorphism --%>
+    <div class="glass rounded-2xl shadow-elixir p-8">
+      <.flash_group flash={@flash} />
+      <%= @inner_content %>
+    </div>
+    
+    <%!-- Footer --%>
+    <p class="mt-8 text-center text-sm text-primary-400 dark:text-primary-500">
+      © <%= DateTime.utc_now().year %> AdminEx. Todos los derechos reservados.
+    </p>
+  </div>
+</main>
+
+<script>
+  if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+</script>

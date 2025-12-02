@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - Página no encontrada</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: { 600: '#4e2a8e', 500: '#7d56c2', 400: '#9b5de5', 100: '#f5f0ff' },
+            accent: '#d499ff',
+            surface: { light: '#f8f7fa', dark: '#0f0b15' },
+            card: { light: '#ffffff', dark: '#1a1625' }
+          }
+        }
+      }
+    }
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark')
+    }
+  </script>
+</head>
+<body class="bg-surface-light dark:bg-surface-dark">
+  <main class="min-h-screen flex items-center justify-center px-4">
+    <div class="text-center">
+      <p class="text-8xl font-bold bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">
+        404
+      </p>
+      <h1 class="mt-4 text-3xl font-bold tracking-tight text-primary-600 dark:text-primary-400 sm:text-5xl">
+        Página no encontrada
+      </h1>
+      <p class="mt-6 text-base leading-7 text-primary-500 dark:text-primary-400">
+        Lo sentimos, no pudimos encontrar la página que buscas.
+      </p>
+      <div class="mt-10">
+        <a href="/" class="inline-flex items-center gap-2 group">
+          <div class="w-10 h-10 bg-gradient-to-br from-primary-600 to-primary-500 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow">
+            <span class="text-white font-bold text-lg">A</span>
+          </div>
+          <span class="text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">
+            AdminEx
+          </span>
+        </a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

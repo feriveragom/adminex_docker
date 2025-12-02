@@ -21,14 +21,14 @@ defmodule AdminexWeb.AuthController do
       {:error, error} ->
         conn
         |> put_flash(:error, "Error al iniciar autenticación: #{inspect(error)}")
-        |> redirect(to: ~p"/")
+        |> redirect(to: ~p"/login")
     end
   end
 
   def request(conn, %{"provider" => provider}) do
     conn
     |> put_flash(:error, "Proveedor no soportado: #{provider}")
-    |> redirect(to: ~p"/")
+    |> redirect(to: ~p"/login")
   end
 
   @doc """
@@ -47,14 +47,14 @@ defmodule AdminexWeb.AuthController do
       {:error, error} ->
         conn
         |> put_flash(:error, "Error de autenticación: #{inspect(error)}")
-        |> redirect(to: ~p"/")
+        |> redirect(to: ~p"/login")
     end
   end
 
   def callback(conn, %{"provider" => provider}) do
     conn
     |> put_flash(:error, "Proveedor no soportado: #{provider}")
-    |> redirect(to: ~p"/")
+    |> redirect(to: ~p"/login")
   end
 
   @doc """
@@ -64,7 +64,7 @@ defmodule AdminexWeb.AuthController do
     conn
     |> configure_session(drop: true)
     |> put_flash(:info, "Sesión cerrada exitosamente")
-    |> redirect(to: ~p"/")
+    |> redirect(to: ~p"/login")
   end
 
   # Private functions

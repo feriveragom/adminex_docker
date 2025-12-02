@@ -5,15 +5,14 @@
 #
 name: Deploy to Gigalixir
 
-# Activación manual solamente (hasta configurar secrets)
-on: workflow_dispatch
-
-# Descomentar esto cuando Gigalixir esté listo:
-# on:
-#   push:
-#     branches:
-#       - main
-#       - master
+# Deploy automático en push a main/master
+on:
+  push:
+    branches:
+      - main
+      - master
+  # También permite activación manual
+  workflow_dispatch:
 
 jobs:
   deploy:
