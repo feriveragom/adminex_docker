@@ -312,16 +312,43 @@ gigalixir login:google
 # Crear app
 gigalixir apps:create --name adminex
 
-# Configurar variables de entorno
+# Configurar variables de entorno (cargar .env primero)
+export $(cat .env | grep -v '^#' | xargs)
 gigalixir config:set DATABASE_URL="$DATABASE_URL"
-gigalixir config:set SECRET_KEY_BASE="$(mix phx.gen.secret)"
+gigalixir config:set SECRET_KEY_BASE="$SECRET_KEY_BASE"
 gigalixir config:set PHX_HOST="adminex.gigalixirapp.com"
+gigalixir config:set GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID"
+gigalixir config:set GOOGLE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"
 
-# Deploy manual (solo la primera vez)
+# Verificar configuración
+gigalixir config
+
+# Deploy
 git push gigalixir master
 ```
 
-Después de esto, cada push a GitHub dispara deploy automático.
+### Agregar URI de producción a Google OAuth
+
+1. Ve a: https://console.cloud.google.com/apis/credentials?project=adminex-oauth
+2. Click en el client **"AdminEx"**
+3. Agrega en **Authorized JavaScript origins**:
+   - `https://adminex.gigalixirapp.com`
+4. Agrega en **Authorized redirect URIs**:
+   - `https://adminex.gigalixirapp.com/auth/google/callback`
+5. Click **Save**
+
+---
+
+## 🌐 URLs del Proyecto
+
+| Entorno | URL |
+|---------|-----|
+| **Local** | http://localhost:4000 |
+| **Producción** | https://adminex.gigalixirapp.com |
+| **GitHub** | https://github.com/feriveragom/adminex |
+| **Supabase** | https://supabase.com/dashboard/project/mxjcejukdxmfembcgpkt |
+| **Google OAuth** | https://console.cloud.google.com/apis/credentials?project=adminex-oauth |
+| **Gigalixir** | https://console.gigalixir.com/#/apps |
 
 ---
 
@@ -335,7 +362,9 @@ Después de esto, cada push a GitHub dispara deploy automático.
 
 - [x] Configurar Supabase
 - [x] GitHub Actions CI/CD
-- [ ] Cuenta Gigalixir (en revisión)
-- [ ] Deploy inicial
+- [x] Cuenta Gigalixir ✅
+- [x] Deploy inicial ✅ (https://adminex.gigalixirapp.com)
+- [x] Google OAuth login ✅
 - [ ] Seeds (admin + roles)
+- [ ] RBAC completo
 - [ ] Auth (login/logout)
