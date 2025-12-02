@@ -1,0 +1,44 @@
+# Deploy automático a Gigalixir cuando se hace push a main/master
+# 
+# ⚠️ DESACTIVADO hasta configurar Gigalixir
+# Para activar: descomentar las líneas de 'on:' y comentar 'on: workflow_dispatch'
+#
+name: Deploy to Gigalixir
+
+# Activación manual solamente (hasta configurar secrets)
+on: workflow_dispatch
+
+# Descomentar esto cuando Gigalixir esté listo:
+# on:
+#   push:
+#     branches:
+#       - main
+#       - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Necesario para git push
+
+      - name: Setup Python (for Gigalixir CLI)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Gigalixir CLI
+        run: pip install gigalixir
+
+      - name: Deploy to Gigalixir
+        env:
+          GIGALIXIR_USERNAME: ${{ secrets.GIGALIXIR_USERNAME }}
+          GIGALIXIR_PASSWORD: ${{ secrets.GIGALIXIR_PASSWORD }}
+          GIGALIXIR_APP_NAME: ${{ secrets.GIGALIXIR_APP_NAME }}
+        run: |
+          gigalixir login -e "$GIGALIXIR_USERNAME" -p "$GIGALIXIR_PASSWORD" -y
+          git remote add gigalixir https://$GIGALIXIR_USERNAME:$GIGALIXIR_PASSWORD@git.gigalixir.com/$GIGALIXIR_APP_NAME.git || true
+          git push -f gigalixir HEAD:refs/heads/main
