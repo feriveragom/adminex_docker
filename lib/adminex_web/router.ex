@@ -20,6 +20,15 @@ defmodule AdminexWeb.Router do
     get "/", PageController, :home
   end
 
+  # OAuth routes
+  scope "/auth", AdminexWeb do
+    pipe_through :browser
+
+    get "/:provider", AuthController, :request
+    get "/:provider/callback", AuthController, :callback
+    delete "/logout", AuthController, :logout
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", AdminexWeb do
   #   pipe_through :api

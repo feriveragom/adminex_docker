@@ -60,7 +60,10 @@ defmodule Adminex.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
       # Mnesia wrapper
-      {:memento, "~> 0.3.2"}
+      {:memento, "~> 0.3.2"},
+      # OAuth (Google, GitHub, etc.)
+      {:assent, "~> 0.3.1"},
+      {:req, "~> 0.4"}  # HTTP client for Assent
     ]
   end
 

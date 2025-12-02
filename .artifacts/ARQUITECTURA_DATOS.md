@@ -43,6 +43,50 @@
 |------------|--------|------------|
 | **Gigalixir** | 1 app corriendo | Escalar a 0 réplicas para "pausar" |
 | **Supabase** | 2 proyectos activos | Pausar proyectos no usados |
+| **Google OAuth** | Ilimitado | Sin límites para autenticación |
+
+---
+
+## 🔐 Google OAuth (Compartido)
+
+El proyecto `adminex-oauth` en Google Cloud proporciona autenticación OAuth para todos los proyectos clonados de este template.
+
+### ¿Por qué un proyecto OAuth compartido?
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  Google Cloud Project: "adminex-oauth"                  │
+│                                                         │
+│  Credenciales OAuth configuradas una vez                │
+│  - Client ID (compartido)                               │
+│  - Client Secret (compartido)                           │
+│  - Redirect URIs: múltiples apps                        │
+└─────────────────────────────────────────────────────────┘
+          │
+          ▼
+    ┌─────────────┬─────────────┬─────────────┐
+    │  AdminEx    │  Proyecto2  │  Proyecto3  │
+    │ localhost   │  app1.com   │  app2.com   │
+    └─────────────┴─────────────┴─────────────┘
+```
+
+### Configurar OAuth para nuevo proyecto clonado
+
+1. Ve a [Google Cloud Console](https://console.cloud.google.com/apis/credentials?project=adminex-oauth)
+2. Click en el client "AdminEx"
+3. En **Authorized JavaScript origins**, agrega tu dominio:
+   - `https://tu-app.gigalixirapp.com`
+4. En **Authorized redirect URIs**, agrega:
+   - `https://tu-app.gigalixirapp.com/auth/google/callback`
+5. Click **Save**
+
+### Variables de entorno requeridas
+
+```bash
+# .env
+GOOGLE_CLIENT_ID=949847859878-p92a065ejloe6uqct4djlbaqoim7btg6.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=tu_secret_aqui
+```
 
 ---
 
@@ -137,12 +181,17 @@ export $(cat .env | grep -v '^#' | xargs) && mix ecto.migrate
 #### Opción A: Alias en `.bashrc` (recomendada para desarrollo)
 ```bash
 # Agregar a ~/.bashrc (una sola vez)
-echo 'alias phx="export \$(cat .env | grep -v \"^#\" | xargs) && mix phx.server"' >> ~/.bashrc
+echo 'alias phx="export \$(cat .env | grep -v \"^#\" | xargs) && iex -S mix phx.server"' >> ~/.bashrc
 source ~/.bashrc
 
 # Luego solo ejecutas:
 phx
 ```
+
+> **Nota:** Usamos `iex -S mix phx.server` en lugar de `mix phx.server` para tener:
+> - ✅ Servidor web corriendo
+> - ✅ Consola interactiva IEx para probar funciones
+> - ✅ Recompilar con `recompile()` sin reiniciar
 
 #### Opción B: Librería `dotenvy` (automática)
 Carga `.env` al compilar. Agregar a `mix.exs`:
@@ -179,9 +228,32 @@ mix phx.server
 ### Paso 8: Deploy en Gigalixir (opcional)
 
 ```bash
-gigalixir create -n mi-proyecto
-gigalixir config:set DATABASE_URL="tu_url"
+# Instalar CLI (Windows)
+python -m pip install gigalixir
+
+# Agregar al PATH (en ~/.bashrc) - ajustar ruta según tu usuario
+echo 'export PATH="$PATH:/c/Users/TU_USUARIO/AppData/Local/Programs/Python/Python313/Scripts"' >> ~/.bashrc
+source ~/.bashrc
+
+# Verificar
+gigalixir version
+
+# Login (elige una opción)
+gigalixir login           # Email + password
+gigalixir login:google    # Abre navegador para OAuth
+
+# Crear app
+gigalixir apps:create --name mi-proyecto
+
+# Configurar variables de entorno
+gigalixir config:set DATABASE_URL="tu_database_url"
 gigalixir config:set SECRET_KEY_BASE="$(mix phx.gen.secret)"
+gigalixir config:set PHX_HOST="mi-proyecto.gigalixirapp.com"
+
+# Agregar remote de Gigalixir
+gigalixir git:remote mi-proyecto
+
+# Deploy
 git push gigalixir main
 ```
 

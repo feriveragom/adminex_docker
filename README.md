@@ -162,6 +162,30 @@ end
 
 ---
 
+## 🔐 Google OAuth (AdminEx)
+
+### Proyecto GCP creado (02-Dic-2025)
+- **Project name:** adminex-oauth
+- **Project ID:** `adminex-oauth`
+- **Console:** https://console.cloud.google.com/welcome?project=adminex-oauth
+
+### Credenciales OAuth
+- **Client ID:** `949847859878-p92a065ejloe6uqct4djlbaqoim7btg6.apps.googleusercontent.com`
+- **Client Secret:** En `.env` como `GOOGLE_CLIENT_SECRET`
+
+### URIs autorizadas
+| Tipo | URI |
+|------|-----|
+| JavaScript origins | `http://localhost:4000` |
+| Redirect URI | `http://localhost:4000/auth/google/callback` |
+
+> ⚠️ **Producción:** Agregar URIs de Gigalixir cuando esté configurado.
+
+### Test users (modo Testing)
+- `feriveragom@gmail.com`
+
+---
+
 ## ☁️ Supabase (AdminEx)
 
 ### Proyecto creado (02-Dic-2025)
@@ -208,12 +232,14 @@ mix run -e 'Adminex.Repo.query!("DROP TABLE IF EXISTS audit_logs, role_permissio
 #### Opción 1: Alias en `.bashrc` ✅ (usamos esta)
 ```bash
 # Agregar a ~/.bashrc (una sola vez)
-echo 'alias phx="export \$(cat .env | grep -v \"^#\" | xargs) && mix phx.server"' >> ~/.bashrc
+echo 'alias phx="export \$(cat .env | grep -v \"^#\" | xargs) && iex -S mix phx.server"' >> ~/.bashrc
 source ~/.bashrc
 
 # Luego solo ejecutas:
 phx
 ```
+
+> **Nota:** Usamos `iex -S mix phx.server` para tener servidor + consola interactiva IEx.
 
 #### Opción 2: Librería `dotenvy`
 Carga `.env` automáticamente al compilar. Agregar a `mix.exs`:
@@ -250,6 +276,55 @@ Visita: **http://localhost:4000**
 
 ---
 
+## 🚀 Deploy Automático (GitHub Actions)
+
+El workflow `.github/workflows/deploy.yml` hace deploy automático a Gigalixir cada vez que haces push a `main` o `master`.
+
+### Configurar Secrets en GitHub
+
+1. Ve a tu repo → **Settings** → **Secrets and variables** → **Actions**
+2. Click **"New repository secret"** y agrega:
+
+| Secret | Valor |
+|--------|-------|
+| `GIGALIXIR_USERNAME` | Tu email de Gigalixir |
+| `GIGALIXIR_PASSWORD` | Tu password de Gigalixir |
+| `GIGALIXIR_APP_NAME` | Nombre de tu app (ej: `adminex`) |
+
+### Configurar Gigalixir (primera vez)
+
+```bash
+# Instalar CLI (Windows)
+python -m pip install gigalixir
+
+# Agregar al PATH (en ~/.bashrc)
+echo 'export PATH="$PATH:/c/Users/mypc/AppData/Local/Programs/Python/Python313/Scripts"' >> ~/.bashrc
+source ~/.bashrc
+
+# Verificar instalación
+gigalixir version
+# 1.15.0
+
+# Login con Google
+gigalixir login:google
+# Abre el navegador, autentícate y vuelve a la terminal
+
+# Crear app
+gigalixir apps:create --name adminex
+
+# Configurar variables de entorno
+gigalixir config:set DATABASE_URL="$DATABASE_URL"
+gigalixir config:set SECRET_KEY_BASE="$(mix phx.gen.secret)"
+gigalixir config:set PHX_HOST="adminex.gigalixirapp.com"
+
+# Deploy manual (solo la primera vez)
+git push gigalixir master
+```
+
+Después de esto, cada push a GitHub dispara deploy automático.
+
+---
+
 ## 📚 Documentación
 
 - **[.artifacts/ARQUITECTURA_DATOS.md](.artifacts/ARQUITECTURA_DATOS.md)** - Guía para crear nuevos proyectos desde este template
@@ -258,6 +333,9 @@ Visita: **http://localhost:4000**
 
 ## 🚀 Próximos pasos
 
-- [ ] Configurar Gigalixir
-- [ ] GitHub Actions CI/CD
-- [ ] Verificar deploy completo
+- [x] Configurar Supabase
+- [x] GitHub Actions CI/CD
+- [ ] Cuenta Gigalixir (en revisión)
+- [ ] Deploy inicial
+- [ ] Seeds (admin + roles)
+- [ ] Auth (login/logout)
