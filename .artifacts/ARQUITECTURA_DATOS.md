@@ -104,16 +104,39 @@ SUPABASE:
 └── mi_tienda_db  (pausada) 💤
 ```
 
-### Comandos para rotar
+### Comandos para escalar réplicas
 
 ```bash
-# === BAJAR app actual ===
+# === PAUSAR app (0 réplicas = no consume recursos) ===
+# Desde el directorio del proyecto:
+gigalixir ps:scale --replicas=0
+
+# O especificando la app desde cualquier lugar:
 gigalixir ps:scale --replicas=0 -a nombre_app
 
-# === SUBIR otra app ===
-# 1. Reactivar BD en Supabase (dashboard → Resume Project)
-# 2. Escalar app en Gigalixir
-gigalixir ps:scale --replicas=1 -a otra_app
+# === REACTIVAR app (volver a 1 réplica) ===
+# Desde el directorio del proyecto:
+gigalixir ps:scale --replicas=1
+
+# O especificando la app desde cualquier lugar:
+gigalixir ps:scale --replicas=1 -a nombre_app
+```
+
+> 💡 **Tip:** Al escalar a 0, la app deja de consumir recursos pero conserva toda su configuración.
+> Los datos en PostgreSQL/Supabase NO se pierden.
+
+### Rotar entre múltiples apps (tier gratuito)
+
+```bash
+# 1. PAUSAR app actual
+cd d:/Personal/emprendedores/adminex
+gigalixir ps:scale --replicas=0
+
+# 2. REACTIVAR otra app
+cd d:/Personal/emprendedores/mi_crm
+# 2.1. Reactivar BD en Supabase (dashboard → Resume Project)
+# 2.2. Escalar app en Gigalixir
+gigalixir ps:scale --replicas=1
 ```
 
 ---

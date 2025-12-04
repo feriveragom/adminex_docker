@@ -430,6 +430,20 @@ git push gigalixir master
    - `https://adminex.gigalixirapp.com/auth/google/callback`
 5. Click **Save**
 
+### Escalar réplicas (pausar/reactivar app)
+
+```bash
+# Pausar la app (0 réplicas = no consume recursos)
+gigalixir ps:scale --replicas=0
+
+# Reactivar la app (volver a 1 réplica)
+gigalixir ps:scale --replicas=1
+```
+
+> 💡 **Tip:** Escalar a 0 réplicas te permite pausar la app sin perder configuración ni datos.
+> La app estará inaccesible hasta que vuelvas a escalarla a 1.
+> Útil para el tier gratuito de Gigalixir que solo permite 1 app corriendo.
+
 ---
 
 ## 🌐 URLs del Proyecto
