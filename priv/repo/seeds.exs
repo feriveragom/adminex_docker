@@ -1,8 +1,8 @@
 # Script to seed initial roles, permissions, and admin user
 # Run with: mix run priv/repo/seeds.exs
 
-alias Adminex.Repo
-alias Adminex.Schemas.{Role, Permission, User, RolePermission}
+alias AdminexDocker.Repo
+alias AdminexDocker.Schemas.{Role, Permission, User, RolePermission}
 import Ecto.Query
 
 IO.puts("🌱 Seeding database...")
@@ -42,30 +42,29 @@ roles_map = Map.new(roles, fn r -> {r.name, r} end)
 IO.puts("\nCreating permissions...")
 
 permissions_data = [
+  # Acceso básico
+  %{code: "home.access", description: "Acceder a / (home)"},
+  %{code: "profile.read", description: "Ver mi perfil"},
+  %{code: "profile.update", description: "Editar mi perfil"},
+
   # Admin
-  %{code: "admin.access", description: "Acceso al panel de administración"},
+  %{code: "admin.access", description: "Acceder a /admin"},
 
   # Users
-  %{code: "users.read", description: "Ver usuarios"},
+  %{code: "users.read", description: "Ver lista de usuarios"},
   %{code: "users.create", description: "Crear usuarios"},
-  %{code: "users.update", description: "Actualizar/deshabilitar usuarios"},
+  %{code: "users.update", description: "Editar usuarios"},
   %{code: "users.delete", description: "Eliminar usuarios"},
 
   # Roles
-  %{code: "roles.read", description: "Ver roles"},
+  %{code: "roles.read", description: "Ver lista de roles"},
   %{code: "roles.create", description: "Crear roles"},
-  %{code: "roles.update", description: "Actualizar roles"},
+  %{code: "roles.update", description: "Editar roles"},
   %{code: "roles.delete", description: "Eliminar roles"},
 
   # Permissions
   %{code: "permissions.read", description: "Ver permisos"},
-  %{code: "permissions.create", description: "Crear permisos"},
-  %{code: "permissions.update", description: "Actualizar permisos"},
-  %{code: "permissions.delete", description: "Eliminar permisos"},
-
-  # Profile
-  %{code: "profile.read", description: "Ver perfil propio"},
-  %{code: "profile.update", description: "Actualizar perfil propio"}
+  %{code: "permissions.assign", description: "Asignar permisos a roles"}
 ]
 
 permissions =
@@ -91,25 +90,17 @@ permissions_map = Map.new(permissions, fn p -> {p.code, p} end)
 IO.puts("\nAssigning permissions to roles...")
 
 role_permissions = %{
-  "SUPER_ADMIN" => [
-    "admin.access",
-    "users.read", "users.create", "users.update", "users.delete",
-    "roles.read", "roles.create", "roles.update", "roles.delete",
-    "permissions.read", "permissions.create", "permissions.update", "permissions.delete",
-    "profile.read", "profile.update"
-  ],
-  "ADMIN" => [
-    "admin.access",
-    "users.read", "users.create", "users.update",
-    "roles.read",
-    "permissions.read",
-    "profile.read", "profile.update"
-  ],
+  "SUPER_ADMIN" => Map.keys(permissions_map),  # Todos los permisos
+  "ADMIN" => Map.keys(permissions_map),        # Todos los permisos
   "PREMIUM_USER" => [
-    "profile.read", "profile.update"
+    "home.access",
+    "profile.read",
+    "profile.update"
   ],
   "FREE_USER" => [
-    "profile.read", "profile.update"
+    "home.access",
+    "profile.read",
+    "profile.update"
   ]
 }
 

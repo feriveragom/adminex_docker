@@ -1,9 +1,9 @@
-defmodule Adminex.MixProject do
+defmodule AdminexDocker.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :adminex,
+      app: :adminex_docker,
       version: "0.1.0",
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -18,7 +18,7 @@ defmodule Adminex.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {Adminex.Application, []},
+      mod: {AdminexDocker.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end
@@ -80,10 +80,10 @@ defmodule Adminex.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["tailwind adminex", "esbuild adminex"],
+      "assets.build": ["tailwind adminex_docker", "esbuild adminex_docker"],
       "assets.deploy": [
-        "tailwind adminex --minify",
-        "esbuild adminex --minify",
+        "tailwind adminex_docker --minify",
+        "esbuild adminex_docker --minify",
         "phx.digest"
       ]
     ]

@@ -3,17 +3,17 @@ import Config
 # Configure your database
 # Use DATABASE_URL if available (for Supabase), otherwise use local postgres
 if System.get_env("DATABASE_URL") do
-  config :adminex, Adminex.Repo,
+  config :adminex_docker, AdminexDocker.Repo,
     url: System.get_env("DATABASE_URL"),
     stacktrace: true,
     show_sensitive_data_on_connection_error: true,
     pool_size: 10
 else
-  config :adminex, Adminex.Repo,
+  config :adminex_docker, AdminexDocker.Repo,
     username: "postgres",
     password: "postgres",
     hostname: "localhost",
-    database: "adminex_dev",
+    database: "adminex_docker_dev",
     stacktrace: true,
     show_sensitive_data_on_connection_error: true,
     pool_size: 10
@@ -25,17 +25,16 @@ end
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we can use it
 # to bundle .js and .css sources.
-config :adminex, AdminexWeb.Endpoint,
-  # Binding to loopback ipv4 address prevents access from other machines.
-  # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
-  http: [ip: {127, 0, 0, 1}, port: 4000],
+config :adminex_docker, AdminexDockerWeb.Endpoint,
+  # Binding to all interfaces (0.0.0.0) to allow Docker containers to connect
+  http: [ip: {0, 0, 0, 0}, port: 4000],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
   secret_key_base: "7Z/lgt3bh7WHu7HWNEgBxow//L/yGhFXiHycQ2uyPUxr5LlF45aYaVd5Y/f2pFpn",
   watchers: [
-    esbuild: {Esbuild, :install_and_run, [:adminex, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:adminex, ~w(--watch)]}
+    esbuild: {Esbuild, :install_and_run, [:adminex_docker, ~w(--sourcemap=inline --watch)]},
+    tailwind: {Tailwind, :install_and_run, [:adminex_docker, ~w(--watch)]}
   ]
 
 # ## SSL Support
@@ -62,17 +61,17 @@ config :adminex, AdminexWeb.Endpoint,
 # different ports.
 
 # Watch static and templates for browser reloading.
-config :adminex, AdminexWeb.Endpoint,
+config :adminex_docker, AdminexDockerWeb.Endpoint,
   live_reload: [
     patterns: [
       ~r"priv/static/(?!uploads/).*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/adminex_web/(controllers|live|components)/.*(ex|heex)$"
+      ~r"lib/adminex_docker_web/(controllers|live|components)/.*(ex|heex)$"
     ]
   ]
 
 # Enable dev routes for dashboard and mailbox
-config :adminex, dev_routes: true
+config :adminex_docker, dev_routes: true
 
 # Logger con colores para mejor legibilidad en desarrollo
 config :logger, :console,

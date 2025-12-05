@@ -1,4 +1,4 @@
-defmodule Adminex.Repo.Migrations.CreateAuditLogs do
+defmodule AdminexDocker.Repo.Migrations.CreateAuditLogs do
   use Ecto.Migration
 
   def change do

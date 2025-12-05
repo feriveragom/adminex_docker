@@ -9,8 +9,8 @@ module.exports = {
   darkMode: 'class',
   content: [
     "./js/**/*.js",
-    "../lib/adminex_web.ex",
-    "../lib/adminex_web/**/*.*ex"
+    "../lib/adminex_docker_web.ex",
+    "../lib/adminex_docker_web/**/*.*ex"
   ],
   theme: {
     extend: {

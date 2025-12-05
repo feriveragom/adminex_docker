@@ -1,0 +1,8 @@
+# Ignore artifacts and build directories
+_build
+deps
+.git
+.env
+.env.example
+*.md
+**/*.md

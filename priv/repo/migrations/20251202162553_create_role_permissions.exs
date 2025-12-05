@@ -1,4 +1,4 @@
-defmodule Adminex.Repo.Migrations.CreateRolePermissions do
+defmodule AdminexDocker.Repo.Migrations.CreateRolePermissions do
   use Ecto.Migration
 
   def change do

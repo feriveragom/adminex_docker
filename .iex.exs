@@ -25,7 +25,7 @@ IEx.configure(
       # Púrpura para AdminEx
       "\e[35m",
       # Nombre de la app
-      "adminex",
+      "adminex_docker",
       "\e[0m",
       # Contador en cyan
       "(\e[36m%counter\e[0m)",
@@ -36,7 +36,7 @@ IEx.configure(
   alive_prompt:
     [
       "\e[35m",
-      "adminex",
+      "adminex_docker",
       "\e[0m",
       "(\e[36m%counter\e[0m)",
       "@\e[33m%node\e[0m",
@@ -52,11 +52,11 @@ IEx.configure(
 )
 
 # Alias útiles para desarrollo
-alias Adminex.Repo
-alias Adminex.Schemas.{User, Role, Permission, RolePermission}
-alias Adminex.Services.UserService
+alias AdminexDocker.Repo
+alias AdminexDocker.Schemas.{User, Role, Permission, RolePermission}
+alias AdminexDocker.Services.UserService
 alias Phoenix.PubSub
-alias AdminexWeb.Endpoint
+alias AdminexDockerWeb.Endpoint
 
 # Helper para ver usuarios con roles
 defmodule H do

@@ -1,4 +1,4 @@
-defmodule Adminex.Repo.Migrations.AddOauthFieldsToUsers do
+defmodule AdminexDocker.Repo.Migrations.AddOauthFieldsToUsers do
   use Ecto.Migration
 
   def change do

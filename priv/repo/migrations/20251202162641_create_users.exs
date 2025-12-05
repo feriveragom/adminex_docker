@@ -1,4 +1,4 @@
-defmodule Adminex.Repo.Migrations.CreateUsers do
+defmodule AdminexDocker.Repo.Migrations.CreateUsers do
   use Ecto.Migration
 
   def change do
