@@ -22,7 +22,9 @@ defmodule AdminexDockerWeb.Admin.RolesLive do
        permissions: permissions,
        search: "",
        show_modal: false,
+       show_delete_modal: false,
        editing_role: nil,
+       deleting_role_id: nil,
        selected_permissions: MapSet.new(),
        is_new: false
      )}
@@ -36,11 +38,14 @@ defmodule AdminexDockerWeb.Admin.RolesLive do
 
   @impl true
   def handle_event("new", _params, socket) do
+    # Cargar los permisos del rol FREE_USER como base
+    free_user_permissions = get_free_user_permissions()
+    
     {:noreply,
      assign(socket,
        show_modal: true,
        editing_role: %Role{name: "", description: ""},
-       selected_permissions: MapSet.new(),
+       selected_permissions: free_user_permissions,
        is_new: true
      )}
   end
@@ -90,7 +95,7 @@ defmodule AdminexDockerWeb.Admin.RolesLive do
         {:noreply,
          socket
          |> put_flash(:info, if(socket.assigns.is_new, do: "Rol creado", else: "Rol actualizado"))
-         |> assign(roles: list_roles(socket.assigns.search), show_modal: false)}
+         |> assign(roles: list_roles(socket.assigns.search), show_modal: false, editing_role: nil)}
 
       {:error, _changeset} ->
         {:noreply, put_flash(socket, :error, "Error al guardar el rol")}
@@ -98,18 +103,31 @@ defmodule AdminexDockerWeb.Admin.RolesLive do
   end
 
   @impl true
-  def handle_event("delete", %{"id" => id}, socket) do
-    role = Repo.get!(Role, id)
+  def handle_event("confirm_delete", %{"id" => id}, socket) do
+    {:noreply, assign(socket, show_delete_modal: true, deleting_role_id: id)}
+  end
+
+  @impl true
+  def handle_event("cancel_delete", _params, socket) do
+    {:noreply, assign(socket, show_delete_modal: false, deleting_role_id: nil)}
+  end
+
+  @impl true
+  def handle_event("delete", _params, socket) do
+    role = Repo.get!(Role, socket.assigns.deleting_role_id)
 
     case Repo.delete(role) do
       {:ok, _} ->
         {:noreply,
          socket
          |> put_flash(:info, "Rol eliminado")
-         |> assign(roles: list_roles(socket.assigns.search))}
+         |> assign(roles: list_roles(socket.assigns.search), show_delete_modal: false, deleting_role_id: nil)}
 
       {:error, _} ->
-        {:noreply, put_flash(socket, :error, "No se puede eliminar el rol")}
+        {:noreply,
+         socket
+         |> put_flash(:error, "No se puede eliminar el rol")
+         |> assign(show_delete_modal: false, deleting_role_id: nil)}
     end
   end
 
@@ -169,4 +187,22 @@ defmodule AdminexDockerWeb.Admin.RolesLive do
     |> Ecto.Changeset.put_assoc(:permissions, permissions)
     |> Repo.update()
   end
+
+  defp get_free_user_permissions do
+    # Obtener los permisos del rol FREE_USER
+    free_user_role =
+      Role
+      |> where(name: "FREE_USER")
+      |> preload(:permissions)
+      |> Repo.one()
+
+    if free_user_role do
+      free_user_role.permissions
+      |> Enum.map(& &1.id)
+      |> MapSet.new()
+    else
+      MapSet.new()
+    end
+  end
 end
+

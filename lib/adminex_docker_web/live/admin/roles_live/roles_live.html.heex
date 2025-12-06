@@ -68,9 +68,9 @@
               </svg>
             </button>
             <button
-              phx-click="delete"
+              type="button"
+              phx-click="confirm_delete"
               phx-value-id={role.id}
-              data-confirm="¿Estás seguro de eliminar este rol?"
               class="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
               title="Eliminar"
             >
@@ -143,9 +143,9 @@
             Editar
           </button>
           <button
-            phx-click="delete"
+            type="button"
+            phx-click="confirm_delete"
             phx-value-id={role.id}
-            data-confirm="¿Estás seguro de eliminar este rol? Los usuarios asociados perderán este rol."
             class="px-4 py-2 rounded-xl border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,5 +156,232 @@
       </div>
     <% end %>
   </div>
+
+  <%!-- Modal para nuevo rol --%>
+  <%= if @show_modal and @is_new do %>
+    <.modal id="new-role-modal" show={true} size="lg" on_cancel={JS.push("close_modal")}>
+      <div class="p-6 max-h-[80vh] overflow-y-auto">
+        <h2 class="text-2xl font-bold text-primary-900 dark:text-primary-100 mb-6">
+          Crear Nuevo Rol
+        </h2>
+
+        <form phx-submit="save_role" class="space-y-6">
+          <%!-- Nombre y Descripción lado a lado en lg --%>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <%!-- Nombre --%>
+            <div>
+              <label class="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-2">
+                Nombre del Rol
+              </label>
+              <input
+                type="text"
+                name="role[name]"
+                value={@editing_role.name || ""}
+                placeholder="Ej: Administrador, Editor, Lector"
+                class="w-full px-4 py-2 rounded-lg border border-primary-200 dark:border-primary-700 bg-white dark:bg-primary-800 text-primary-900 dark:text-primary-100 focus:ring-2 focus:ring-accent focus:border-transparent"
+              />
+            </div>
+
+            <%!-- Descripción --%>
+            <div>
+              <label class="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-2">
+                Descripción
+              </label>
+              <textarea
+                name="role[description]"
+                placeholder="Describe el propósito de este rol..."
+                rows="1"
+                class="w-full px-4 py-2 rounded-lg border border-primary-200 dark:border-primary-700 bg-white dark:bg-primary-800 text-primary-900 dark:text-primary-100 focus:ring-2 focus:ring-accent focus:border-transparent resize-none"
+              ><%= @editing_role.description || "" %></textarea>
+            </div>
+          </div>
+
+          <%!-- Permisos en grid --%>
+          <div>
+            <label class="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-3">
+              Asignar Permisos
+            </label>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-64 overflow-y-auto bg-primary-50 dark:bg-primary-900/20 rounded-lg p-4">
+              <%= for {category, permissions} <- @permissions do %>
+                <div class="space-y-2">
+                  <h4 class="text-xs font-semibold text-primary-600 dark:text-primary-400 uppercase">
+                    <%= category %>
+                  </h4>
+                  <div class="space-y-1.5">
+                    <%= for permission <- permissions do %>
+                      <label class="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          name="permissions[]"
+                          value={permission.id}
+                          checked={MapSet.member?(@selected_permissions, permission.id)}
+                          phx-click="toggle_permission"
+                          phx-value-id={permission.id}
+                          class="rounded border-primary-300 text-accent focus:ring-accent w-4 h-4"
+                        />
+                        <span class="text-xs text-primary-700 dark:text-primary-300">
+                          <%= permission.code %>
+                        </span>
+                      </label>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+
+          <%!-- Botones --%>
+          <div class="mt-8 flex gap-3 justify-end pt-4 border-t border-primary-100 dark:border-primary-800">
+            <button
+              type="button"
+              phx-click={JS.push("close_modal")}
+              class="px-6 py-2 rounded-lg border border-primary-200 dark:border-primary-700 text-primary-700 dark:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/30 transition-colors font-medium"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              style="background-color: #4e2a8e; color: white;"
+              class="px-6 py-2 rounded-lg text-white hover:opacity-90 transition-opacity font-semibold"
+            >
+              Crear Rol
+            </button>
+          </div>
+        </form>
+      </div>
+    </.modal>
+  <% end %>
+
+  <%!-- Modal para editar rol --%>
+  <%= if @show_modal and !@is_new do %>
+    <.modal id="edit-role-modal" show={true} size="lg" on_cancel={JS.push("close_modal")}>
+      <div class="p-6 max-h-[80vh] overflow-y-auto">
+        <h2 class="text-2xl font-bold text-primary-900 dark:text-primary-100 mb-6">
+          Editar Rol
+        </h2>
+
+        <form phx-submit="save_role" class="space-y-6">
+          <%!-- Nombre --%>
+          <div>
+            <label class="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-2">
+              Nombre del Rol
+            </label>
+            <input
+              type="text"
+              name="role[name]"
+              value={@editing_role.name}
+              placeholder="Ej: Administrador, Editor, Lector"
+              class="w-full px-4 py-2 rounded-lg border border-primary-200 dark:border-primary-700 bg-white dark:bg-primary-800 text-primary-900 dark:text-primary-100 focus:ring-2 focus:ring-accent focus:border-transparent"
+            />
+          </div>
+
+          <%!-- Descripción --%>
+          <div>
+            <label class="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-2">
+              Descripción
+            </label>
+            <textarea
+              name="role[description]"
+              placeholder="Describe el propósito de este rol..."
+              rows="3"
+              class="w-full px-4 py-2 rounded-lg border border-primary-200 dark:border-primary-700 bg-white dark:bg-primary-800 text-primary-900 dark:text-primary-100 focus:ring-2 focus:ring-accent focus:border-transparent"
+            ><%= @editing_role.description %></textarea>
+          </div>
+
+          <%!-- Permisos --%>
+          <div>
+            <label class="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-3">
+              Asignar Permisos
+            </label>
+            <div class="space-y-3 max-h-64 overflow-y-auto bg-primary-50 dark:bg-primary-900/20 rounded-lg p-4">
+              <%= for {category, permissions} <- @permissions do %>
+                <div>
+                  <h4 class="text-xs font-semibold text-primary-600 dark:text-primary-400 uppercase mb-2">
+                    <%= category %>
+                  </h4>
+                  <div class="space-y-2 ml-2">
+                    <%= for permission <- permissions do %>
+                      <label class="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          name="permissions[]"
+                          value={permission.id}
+                          checked={MapSet.member?(@selected_permissions, permission.id)}
+                          phx-click="toggle_permission"
+                          phx-value-id={permission.id}
+                          class="rounded border-primary-300 text-accent focus:ring-accent"
+                        />
+                        <span class="text-sm text-primary-700 dark:text-primary-300">
+                          <%= permission.code %>
+                        </span>
+                      </label>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+
+          <%!-- Botones --%>
+          <div class="mt-8 flex gap-3 justify-end pt-4 border-t border-primary-100 dark:border-primary-800">
+            <button
+              type="button"
+              phx-click={JS.push("close_modal")}
+              class="px-6 py-2 rounded-lg border border-primary-200 dark:border-primary-700 text-primary-700 dark:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/30 transition-colors font-medium"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              style="background-color: #4e2a8e; color: white;"
+              class="px-6 py-2 rounded-lg text-white hover:opacity-90 transition-opacity font-semibold"
+            >
+              Guardar
+            </button>
+          </div>
+        </form>
+      </div>
+    </.modal>
+  <% end %>
+
+  <%!-- Modal de confirmación de eliminación --%>
+  <%= if @show_delete_modal do %>
+    <.modal id="confirm-delete-role-modal" show={true} size="md" on_cancel={JS.push("cancel_delete")}>
+      <div class="p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/30">
+            <svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m0 4v2M9.172 7.172a4 4 0 015.656 0m-5.656 8.484a4 4 0 005.656 0M9 11h.01M13 7h-2m0 4h2m-2 4h2" />
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold text-primary-900 dark:text-primary-100">
+            Eliminar Rol
+          </h2>
+        </div>
+        
+        <p class="text-primary-600 dark:text-primary-400 mb-6">
+          ¿Estás seguro de que deseas eliminar este rol? Esta acción no se puede deshacer. Los usuarios asociados perderán este rol.
+        </p>
+
+        <div class="flex gap-3 justify-end pt-4 border-t border-primary-100 dark:border-primary-800">
+          <button
+            type="button"
+            phx-click={JS.push("cancel_delete")}
+            class="px-6 py-2 rounded-lg border border-primary-200 dark:border-primary-700 text-primary-700 dark:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/30 transition-colors font-medium"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            phx-click="delete"
+            style="background-color: #dc2626;"
+            class="px-6 py-2 rounded-lg text-white hover:opacity-90 transition-opacity font-semibold"
+          >
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </.modal>
+  <% end %>
 
 </div>
