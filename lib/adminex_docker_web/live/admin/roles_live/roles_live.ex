@@ -52,7 +52,11 @@ defmodule AdminexDockerWeb.Admin.RolesLive do
 
   @impl true
   def handle_event("edit", %{"id" => id}, socket) do
-    role = get_role_with_permissions(id)
+    role = 
+      Role
+      |> Repo.get!(id)
+      |> Repo.preload(permissions: from(p in Permission, order_by: p.code))
+    
     permission_ids = role.permissions |> Enum.map(& &1.id) |> MapSet.new()
 
     {:noreply,
@@ -161,12 +165,6 @@ defmodule AdminexDockerWeb.Admin.RolesLive do
     |> order_by([p], asc: p.code)
     |> Repo.all()
     |> Enum.group_by(fn p -> p.code |> String.split(".") |> hd() end)
-  end
-
-  defp get_role_with_permissions(id) do
-    Role
-    |> Repo.get!(id)
-    |> Repo.preload(:permissions)
   end
 
   defp create_role(params, permission_ids) do
