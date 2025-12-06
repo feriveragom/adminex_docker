@@ -2,12 +2,15 @@ defmodule AdminexDocker.Schemas.RolePermission do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @primary_key {:id, :binary_id, autogenerate: true}
+  @primary_key false
   @foreign_key_type :binary_id
 
   schema "role_permissions" do
-    belongs_to :role, AdminexDocker.Schemas.Role
-    belongs_to :permission, AdminexDocker.Schemas.Permission
+    field :role_id, :binary_id, primary_key: true
+    field :permission_id, :binary_id, primary_key: true
+    
+    belongs_to :role, AdminexDocker.Schemas.Role, define_field: false
+    belongs_to :permission, AdminexDocker.Schemas.Permission, define_field: false
 
     timestamps(type: :utc_datetime)
   end

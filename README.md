@@ -95,6 +95,11 @@ cd /d/Personal/productos/adminex_docker && docker compose up -d app
 cd /d/Personal/productos/adminex_docker && docker compose up -d --build --force-recreate -V app
 
 cd /d/Personal/productos/adminex_docker && docker logs adminex_app --tail 20 2>&1
+cd /d/Personal/productos/adminex_docker && docker-compose logs app --tail 50 2>&1 | tail -100
+
+cd /d/Personal/productos/adminex_docker && git add -A && git commit -m "feat: assign FREE_USER permissions by default when creating new role"
+
+cd /d/Personal/productos/adminex_docker && docker-compose down -v && docker-compose up -d --build 2>&1 | tail -30
 ```
 
 ---

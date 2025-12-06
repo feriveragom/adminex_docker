@@ -3,9 +3,8 @@ defmodule AdminexDocker.Repo.Migrations.CreateRolePermissions do
 
   def change do
     create table(:role_permissions, primary_key: false) do
-      add :id, :binary_id, primary_key: true
-      add :role_id, references(:roles, type: :binary_id, on_delete: :delete_all), null: false
-      add :permission_id, references(:permissions, type: :binary_id, on_delete: :delete_all), null: false
+      add :role_id, references(:roles, type: :binary_id, on_delete: :delete_all), null: false, primary_key: true
+      add :permission_id, references(:permissions, type: :binary_id, on_delete: :delete_all), null: false, primary_key: true
 
       timestamps(type: :utc_datetime)
     end
