@@ -59,6 +59,7 @@ defmodule AdminexDocker.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
+      {:timex, "~> 3.7.11"},
       # Mnesia wrapper
       {:memento, "~> 0.3.2"},
       # OAuth (Google, GitHub, etc.)

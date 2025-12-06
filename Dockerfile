@@ -22,7 +22,7 @@ RUN mix local.hex --force && \
 COPY . /app
 
 # Install dependencies
-RUN mix deps.get
+RUN HEX_HTTP_CONCURRENCY=1 HEX_HTTP_TIMEOUT=300 mix deps.get
 
 # Compile the project
 RUN mix do compile

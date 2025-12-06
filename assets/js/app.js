@@ -23,9 +23,30 @@ import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
+
+let Hooks = {}
+Hooks.Flash = {
+  mounted() {
+    let hide = () => liveSocket.execJS(this.el, this.el.getAttribute("phx-click"))
+    this.timer = setTimeout(() => hide(), 8000)
+    this.el.addEventListener("phx:hide-start", () => clearTimeout(this.timer))
+    this.el.addEventListener("mouseover", () => {
+      clearTimeout(this.timer)
+      this.timer = null
+    })
+    this.el.addEventListener("mouseout", () => {
+      if (!this.timer) {
+        this.timer = setTimeout(() => hide(), 8000)
+      }
+    })
+  },
+  destroyed() { clearTimeout(this.timer) }
+}
+
 let liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
-  params: {_csrf_token: csrfToken}
+  params: {_csrf_token: csrfToken},
+  hooks: Hooks
 })
 
 // Show progress bar on live navigation and form submits

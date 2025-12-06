@@ -37,17 +37,24 @@ defmodule AdminexDockerWeb.AuthController do
   def callback(conn, %{"provider" => "google"} = params) do
     session_params = get_session(conn, :oauth_session_params)
 
-    config()
-    |> Keyword.put(:session_params, session_params)
-    |> Google.callback(params)
-    |> case do
-      {:ok, %{user: user_info, token: _token}} ->
-        handle_successful_auth(conn, user_info)
+    # Si no hay session_params, la sesión se perdió (cambio de dominio, timeout, etc.)
+    if is_nil(session_params) do
+      conn
+      |> put_flash(:error, "Sesión expirada. Por favor, intenta iniciar sesión de nuevo.")
+      |> redirect(to: ~p"/login")
+    else
+      config()
+      |> Keyword.put(:session_params, session_params)
+      |> Google.callback(params)
+      |> case do
+        {:ok, %{user: user_info, token: _token}} ->
+          handle_successful_auth(conn, user_info)
 
-      {:error, error} ->
-        conn
-        |> put_flash(:error, "Error de autenticación: #{inspect(error)}")
-        |> redirect(to: ~p"/login")
+        {:error, error} ->
+          conn
+          |> put_flash(:error, "Error de autenticación: #{inspect(error)}")
+          |> redirect(to: ~p"/login")
+      end
     end
   end
 

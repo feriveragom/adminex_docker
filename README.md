@@ -77,13 +77,24 @@ O visita directamente: **http://localhost:4000** (Sin SSL).
 
 ```bash
 # Entrar a la consola de IEx dentro del contenedor
-docker-compose exec app iex -S mix
+cd /d/Personal/productos/adminex_docker && docker-compose exec app iex -S mix
 
 # Correr migraciones manualmente
-docker-compose exec app mix ecto.migrate
+cd /d/Personal/productos/adminex_docker && docker-compose exec app mix ecto.migrate
 
 # Resetear base de datos
-docker-compose exec app mix ecto.reset
+cd /d/Personal/productos/adminex_docker && docker-compose exec app mix ecto.reset
+
+cd /d/Personal/productos/adminex_docker && rm mix.lock && docker compose up -d --build app
+cd /d/Personal/productos/adminex_docker && rm -f mix.lock && docker compose up -d --build app
+cd /d/Personal/productos/adminex_docker && rm -f mix.lock
+cd /d/Personal/productos/adminex_docker && docker compose up -d --build app
+cd /d/Personal/productos/adminex_docker && docker compose run --rm app mix deps.get
+cd /d/Personal/productos/adminex_docker && docker compose up -d app
+
+cd /d/Personal/productos/adminex_docker && docker compose up -d --build --force-recreate -V app
+
+cd /d/Personal/productos/adminex_docker && docker logs adminex_app --tail 20 2>&1
 ```
 
 ---
@@ -97,6 +108,7 @@ docker-compose exec app mix ecto.reset
 | Código | Descripción |
 |--------|-------------|
 | `home.access` | Acceder a `/` (home) |
+| `profile.access` | Acceder a `/profile` |
 | `profile.read` | Ver mi perfil |
 | `profile.update` | Editar mi perfil |
 | `admin.access` | Acceder a `/admin` |
@@ -115,10 +127,10 @@ docker-compose exec app mix ecto.reset
 
 | Rol | Permisos |
 |-----|----------|
-| **SUPER_ADMIN** | Todos (14) |
-| **ADMIN** | Todos (14) |
-| **PREMIUM_USER** | `home.access`, `profile.read`, `profile.update` |
-| **FREE_USER** | `home.access`, `profile.read`, `profile.update` |
+| **SUPER_ADMIN** | Todos (15) |
+| **ADMIN** | Todos (15) |
+| **PREMIUM_USER** | `home.access`, `profile.access`, `profile.read`, `profile.update` |
+| **FREE_USER** | `home.access`, `profile.access`, `profile.read`, `profile.update` |
 
 ### Seed Inicial
 

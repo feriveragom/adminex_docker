@@ -44,6 +44,7 @@ IO.puts("\nCreating permissions...")
 permissions_data = [
   # Acceso básico
   %{code: "home.access", description: "Acceder a / (home)"},
+  %{code: "profile.access", description: "Acceder a /profile"},
   %{code: "profile.read", description: "Ver mi perfil"},
   %{code: "profile.update", description: "Editar mi perfil"},
 
@@ -94,11 +95,13 @@ role_permissions = %{
   "ADMIN" => Map.keys(permissions_map),        # Todos los permisos
   "PREMIUM_USER" => [
     "home.access",
+    "profile.access",
     "profile.read",
     "profile.update"
   ],
   "FREE_USER" => [
     "home.access",
+    "profile.access",
     "profile.read",
     "profile.update"
   ]

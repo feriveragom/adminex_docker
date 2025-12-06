@@ -43,7 +43,7 @@ defmodule AdminexDockerWeb do
         layouts: [html: AdminexDockerWeb.Layouts]
 
       import Plug.Conn
-      import AdminexDockerWeb.Gettext
+      use Gettext, backend: AdminexDockerWeb.Gettext
 
       unquote(verified_routes())
     end
@@ -83,9 +83,9 @@ defmodule AdminexDockerWeb do
     quote do
       # HTML escaping functionality
       import Phoenix.HTML
-      # Core UI components and translation
+      # Core UI components
       import AdminexDockerWeb.CoreComponents
-      import AdminexDockerWeb.Gettext
+      use Gettext, backend: AdminexDockerWeb.Gettext
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS

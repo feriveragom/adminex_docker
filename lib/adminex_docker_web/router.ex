@@ -54,10 +54,14 @@ defmodule AdminexDockerWeb.Router do
   end
 
   # Rutas de admin (requieren permiso admin.access)
-  scope "/", AdminexDockerWeb do
+  scope "/admin", AdminexDockerWeb do
     pipe_through [:browser, :auth, :admin]
 
-    live "/admin", AdminLive, :index
+    live "/", AdminLive, :index
+    live "/users", Admin.UsersLive, :index
+    live "/roles", Admin.RolesLive, :index
+    live "/permissions", Admin.PermissionsLive, :index
+    live "/audit", Admin.AuditLive, :index
   end
 
   # Other scopes may use custom stacks.

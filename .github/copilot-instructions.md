@@ -1,4 +1,4 @@
-# Patrones y Anti-Patrones - AdminEx
+# Patrones y Anti-Patrones - AdminexDocker
 
 ## 🎯 Principios Fundamentales
 
@@ -24,13 +24,13 @@ Las dependencias DEBEN apuntar hacia adentro. Domain no sabe nada de BD o UI.
 
 ```elixir
 # ✅ Domain NO importa Ecto
-defmodule Adminex.Domain.User do
+defmodule AdminexDocker.Domain.User do
   defstruct [:id, :email, :role_id]
 end
 
 # ✅ Infrastructure implementa interfaces del Domain
-defmodule Adminex.Infra.UserRepo do
-  @behaviour Adminex.Domain.UserRepository
+defmodule AdminexDocker.Infra.UserRepo do
+  @behaviour AdminexDocker.Domain.UserRepository
   # Aquí sí usamos Ecto
 end
 ```
@@ -51,6 +51,8 @@ Toda UI diseñada para móviles (320px+) primero, luego pantallas grandes.
 ```
 
 **Breakpoints Tailwind:**
+-https://tailwindcss.com/plus/ui-blocks
+-https://tailwindcss.com/docs/styling-with-utility-classes
 - Base (sin prefijo): 0px+ (móvil)
 - `sm:` 640px+
 - `md:` 768px+
@@ -75,14 +77,14 @@ if user.role == :admin, do: delete(user_id)
 Separar acceso a datos de la lógica de negocio.
 ```elixir
 # Behaviour (interfaz)
-defmodule Adminex.Repositories.UserRepository do
+defmodule AdminexDocker.Repositories.UserRepository do
   @callback get(id) :: {:ok, map()} | {:error, :not_found}
   @callback create(attrs) :: {:ok, map()} | {:error, term()}
 end
 
 # Implementación
-defmodule Adminex.Repositories.Ecto.UserRepository do
-  @behaviour Adminex.Repositories.UserRepository
+defmodule AdminexDocker.Repositories.Ecto.UserRepository do
+  @behaviour AdminexDocker.Repositories.UserRepository
   # ...
 end
 ```
@@ -105,7 +107,7 @@ Verificar **permisos**, no roles. (Ver principio #4 arriba)
 ### 4. Context Pattern
 Agrupar funcionalidad relacionada.
 ```
-lib/adminex/
+lib/AdminexDocker/
 ├── accounts/       # Contexto: usuarios, auth
 ├── authorization/  # Contexto: roles, permisos
 └── auditing/       # Contexto: logs
@@ -227,7 +229,7 @@ Separar la lógica del módulo `.ex` del template `.heex` en carpetas dedicadas.
 
 **Estructura:**
 ```
-lib/adminex_web/live/
+lib/AdminexDocker_web/live/
 ├── home_live/
 │   ├── home_live.ex        # Lógica (mount, handle_event, etc.)
 │   └── home_live.html.heex # Template (solo HTML/HEEx)
@@ -243,8 +245,8 @@ lib/adminex_web/live/
 
 ```elixir
 # ✅ CORRECTO - Template separado (archivo .html.heex en la misma carpeta)
-defmodule AdminexWeb.HomeLive do
-  use AdminexWeb, :live_view
+defmodule AdminexDockerWeb.HomeLive do
+  use AdminexDockerWeb, :live_view
 
   @impl true
   def mount(_params, session, socket) do
@@ -255,8 +257,8 @@ defmodule AdminexWeb.HomeLive do
 end
 
 # ❌ INCORRECTO - Template inline (difícil de mantener en templates grandes)
-defmodule AdminexWeb.HomeLive do
-  use AdminexWeb, :live_view
+defmodule AdminexDockerWeb.HomeLive do
+  use AdminexDockerWeb, :live_view
 
   @impl true
   def mount(_params, session, socket) do

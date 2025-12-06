@@ -63,6 +63,9 @@ config :adminex_docker, AdminexDockerWeb.Endpoint,
 # Watch static and templates for browser reloading.
 config :adminex_docker, AdminexDockerWeb.Endpoint,
   live_reload: [
+    # Polling for Docker on Windows (inotify doesn't work with mounted volumes)
+    backend: :fs_poll,
+    backend_opts: [interval: 500],
     patterns: [
       ~r"priv/static/(?!uploads/).*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",

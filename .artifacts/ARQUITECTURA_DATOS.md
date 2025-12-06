@@ -53,16 +53,17 @@ users ─────────────▶ audit_logs
 
 | Rol | Descripción | Permisos |
 |-----|-------------|----------|
-| `SUPER_ADMIN` | Acceso total | Todos (14) |
-| `ADMIN` | Acceso total | Todos (14) |
-| `PREMIUM_USER` | Usuario de pago | Solo básicos (3) |
-| `FREE_USER` | Usuario gratuito (default) | Solo básicos (3) |
+| `SUPER_ADMIN` | Acceso total | Todos (15) |
+| `ADMIN` | Acceso total | Todos (15) |
+| `PREMIUM_USER` | Usuario de pago | Solo básicos (4) |
+| `FREE_USER` | Usuario gratuito (default) | Solo básicos (4) |
 
-### Lista de Permisos (14 total)
+### Lista de Permisos (15 total)
 
 | Código | Descripción | SUPER_ADMIN/ADMIN | FREE/PREMIUM |
 |--------|-------------|:-----------------:|:------------:|
 | `home.access` | Acceder a `/` (home) | ✅ | ✅ |
+| `profile.access` | Acceder a `/profile` | ✅ | ✅ |
 | `profile.read` | Ver mi perfil | ✅ | ✅ |
 | `profile.update` | Editar mi perfil | ✅ | ✅ |
 | `admin.access` | Acceder a `/admin` | ✅ | ❌ |
